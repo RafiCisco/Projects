@@ -4,8 +4,8 @@
 
 # Code owners for the entire repository
 #* @global-owner1 @global-owner2
-#* @Rafi98 
-* @RafiCisco/projecta_admin
+* @Rafi98 
+#* @RafiCisco/projecta_admin
 
 # Code owners for a specific directory
 #/docs/ @documentation-team
