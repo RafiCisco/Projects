@@ -50,5 +50,5 @@ jobs:
 
     - name: Print Projects, Repository Names and URLs
       run: |
-        cat Projects.json | jq -r '.projects[] | "\(.name): \(.repositories[].name) - \(.repositories[].url)"' | sort -u
+       cat Projects.json | jq '.'    # Print all lines from JSON data
       shell: bash
