@@ -26,6 +26,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Make script executable
+        run: chmod +x Process.sh   
+
+      - name: Run shell script
+        run: |
+          ./Process.sh
+        shell: bash
+
       - name: Install jq
         run: sudo apt-get install -y jq
 
