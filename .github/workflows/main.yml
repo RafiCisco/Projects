@@ -1,10 +1,10 @@
 name: Get Repositories
 
 on:
-  #workflow_dispatch:
-  push:
-    paths:
-      - Projects.json
+  workflow_dispatch:
+  #push:
+    #paths:
+      #- Projects.json
 
 jobs:
  Install_gh_CLI:
