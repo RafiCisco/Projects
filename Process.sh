@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Path to the JSON file
-JSON_FILE="https://github.com/RafiCisco/Projects/blob/main/Projects.json"
+JSON_FILE="Projects/Projects.json"
 
 # Check if jq is installed
 if ! command -v jq &> /dev/null
