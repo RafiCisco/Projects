@@ -12,7 +12,7 @@
 
 # Code owners for specific files
 #/src/main.js @js-owner
-* @RafiCisco/projecta_admin 
+
 
 # Code owners for all JavaScript files in a directory
 #/src/*.js @js-team
@@ -38,8 +38,7 @@
 # Specific directories
 #/docs/ @docs-team
 #/src/ @dev-team
-* @RafiCisco/projecta_admin 
-* @RafiCisco/projecta_dev
+
 
 # Specific files
 #/src/index.js @frontend-dev
