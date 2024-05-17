@@ -1,43 +1,17 @@
-name: Process Projects JSON
+name: Get Repositories
 
 on:
-  push:
-    paths:
-      - Projects.json
+  workflow_dispatch:
 
 jobs:
-  process-projects:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install jq
-        run: sudo apt-get install -y jq
-
-      - name: Read and process projects.json
-        id: process_json
+ Install_gh_CLI:
+     runs-on: ubuntu-latest
+     steps:
+      - name: Install gh CLI
         run: |
-          JSON_FILE="projects.json"
-          if [[ -f "$JSON_FILE" ]]; then
-            echo "Processing $JSON_FILE"
-            cat $JSON_FILE | jq -r '.projects[] | "\(.name) \(.repositories[] | "\(.name): \(.url)")"' > project-repos.txt
-          else
-            echo "$JSON_FILE not found!"
-            exit 1
-          
-          cat project-repos.txt
-
-      - name: Perform actions based on repositories
-        run: |
-          while IFS= read -r line; do
-            echo "Processing line: $line"
-            project_name=$(echo $line | awk '{print $1}')
-            repo_info=$(echo $line | awk '{print $2}')
-            repo_name=$(echo $repo_info | cut -d':' -f1)
-            repo_url=$(echo $repo_info | cut -d':' -f2)
-            echo "Project: $project_name, Repository: $repo_name, URL: $repo_url"
-            # Example action: Clone the repository
-            git clone $repo_url
-          done < project-repos.txt
+          # Install gh CLI
+          sudo mkdir -p -m 755 /etc/apt/keyrings && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+          && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
