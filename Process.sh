@@ -1,23 +1,25 @@
 #!/bin/bash
 
-# Path to the JSON file
-JSON_FILE="Projects/Projects.json"
+# Read the JSON file
+json=$(<Projects.json)
 
-# Check if jq is installed
-if ! command -v jq &> /dev/null
-then
-    echo "jq is required but not installed. Please install jq and try again."
-    exit 1
-fi
+# Parse JSON data using jq
+projects=$(echo "$json" | jq -r '.projects[]')
 
-# Check if the JSON file exists
-if [[ ! -f "$JSON_FILE" ]]; then
-    echo "JSON file $JSON_FILE not found!"
-    exit 1
-fi
+# Loop through each project
+echo "$projects" | while IFS= read -r project; do
+    projectName=$(echo "$project" | jq -r '.name')
+    repositories=$(echo "$project" | jq -r '.repositories[]')
 
-# Read and process the JSON file
-jq -r '.projects[] | .repositories[] | .url' "$JSON_FILE" | while read -r repo_url; do
-    echo "Cloning $repo_url..."
-    git clone "$repo_url"
+    # Display project name
+    echo "Project: $projectName"
+
+    # Loop through each repository
+    echo "$repositories" | while IFS= read -r repository; do
+        repoName=$(echo "$repository" | jq -r '.name')
+        repoUrl=$(echo "$repository" | jq -r '.url')
+
+        # Display repository name and URL
+        echo "  Repository: $repoName - $repoUrl"
+    done
 done
