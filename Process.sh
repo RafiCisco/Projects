@@ -1,25 +1,15 @@
 #!/bin/bash
 
-# Read the JSON file
-json=$(<Projects.json)
+# Check if the JSON file exists
+if [ ! -f Projects.json ]; then
+    echo "Projects.json file not found!"
+    exit 1
+fi
 
-# Parse JSON data using jq
-projects=$(echo "$json" | jq -r '.projects[]')
-
-# Loop through each project
-echo "$projects" | while IFS= read -r project; do
-    projectName=$(echo "$project" | jq -r '.name')
-    repositories=$(echo "$project" | jq -r '.repositories[]')
-
-    # Display project name
-    echo "Project: $projectName"
-
-    # Loop through each repository
-    echo "$repositories" | while IFS= read -r repository; do
-        repoName=$(echo "$repository" | jq -r '.name')
-        repoUrl=$(echo "$repository" | jq -r '.url')
-
-        # Display repository name and URL
-        echo "  Repository: $repoName - $repoUrl"
-    done
-done
+# Use jq to parse the JSON and print the project names and repository details
+jq -r '
+    .projects[] | 
+    .name as $projectName | 
+    .repositories[] | 
+    "Project: \($projectName), Repository: \(.name), URL: \(.url)"
+' Projects.json
