@@ -3,7 +3,7 @@ name: Process Projects JSON
 on:
   push:
     paths:
-      - projects.json
+      - Projects.json
 
 jobs:
   process-projects:
