@@ -1,10 +1,10 @@
 name: Process Projects JSON
 
 on:
- workflow_dispatch:
-  #push:
-    #paths:
-      #- Projects.json
+ #workflow_dispatch:
+  push:
+    paths:
+      - Projects.json
 
 jobs:
   process-projects:
