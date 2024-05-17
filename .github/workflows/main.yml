@@ -48,7 +48,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Print Repository Names and URLs
+    - name: Print Projects, Repository Names and URLs
       run: |
-        cat Projects.json | jq -r '.projects[].repositories[] | "Repository: \(.name), URL: \(.url)"'
+        cat Projects.json | jq -r '.projects[] as $project | "\($project.name): \($project.repositories[].name) - \($project.repositories[].url)"'
       shell: bash
