@@ -46,7 +46,7 @@ jobs:
           while IFS= read -r line; do
             project_name=$(echo $line | awk '{print $1}')
             repo_info=$(echo $line | awk '{print $2}')
-            repo_name=$(echo $repo_info | cut -d':' -f1)
+            repo_name=$(echo $repo_info | cut -d':' -f1-)
             repo_url=$(echo $repo_info | cut -d':' -f2-)
             echo "Project: $project_name, Repository: $repo_name, URL: $repo_url"
           done < project-repos.txt
