@@ -50,5 +50,5 @@ jobs:
 
     - name: Print Projects, Repository Names and URLs
       run: |
-       cat Projects.json | jq '.'    # Print all lines from JSON data
+       cat Projects.json | jq -r '.projects[] | "\(.name): \(.repositories[0].url)"' | awk '!seen[$0]++'
       shell: bash
