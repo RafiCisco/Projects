@@ -53,4 +53,3 @@ jobs:
        #cat Projects.json | jq -r '.projects[] || "\(.name): \(.repositories[0].url)"' | awk '!seen[$0]++'
        cat Projects.json | jq -r '.projects[] | "\(.name): \(.repositories[].name) - \(.repositories[0].url)"' | awk '!seen[$0]++'
       shell: bash
-      shell: bash
