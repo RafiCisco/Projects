@@ -4,7 +4,7 @@
 json=$(<Projects.json)
 
 # Parse JSON data using jq
-projects=$(echo "$json" | jq -r '.Projects[]')
+projects=$(echo "$json" | jq -r '.projects[]')
 
 # Loop through each project
 echo "$projects" | while IFS= read -r project; do
@@ -12,7 +12,7 @@ echo "$projects" | while IFS= read -r project; do
     repositories=$(echo "$project" | jq -r '.repositories[]')
 
     # Display project name
-    echo "Projects: $projectName"
+    echo "Project: $projectName"
 
     # Loop through each repository
     echo "$repositories" | while IFS= read -r repository; do
