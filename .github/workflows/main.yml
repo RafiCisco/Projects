@@ -29,10 +29,7 @@ jobs:
       - name: Install jq
         run: sudo apt-get install -y jq
 
-      - name: Run shell script
-        run: |
-         bash Process.sh
-        shell: bash
+      
 
       - name: Read and process projects.json
         id: process_json
