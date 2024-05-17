@@ -38,15 +38,42 @@ jobs:
             cat $FILE_PATH | jq -r '.projects[] | "\(.name) \(.repositories[] | "\(.name): \(.url)")"' > project-repos.txt
           else
             echo "$FILE_PATH not found!"
-            exit 1
           fi
 
-      - name: Print repositories
-        run: |
-          while IFS= read -r line; do
-            project_name=$(echo $line | awk '{print $1}')
-            repo_info=$(echo $line | awk '{print $2}')
-            repo_name=$(echo $repo_info | cut -d':' -f1-)
-            repo_url=$(echo $repo_info | cut -d':' -f3-)
-            echo "Project: $project_name, Repository: $repo_name, URL: $repo_url"
-          done < project-repos.txt
+      
+ print-projects:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Print Projects
+      run: |
+        cat Projects.json | while IFS= read -r project; do
+          project_name=$(echo "$project" | jq -r '.name')
+          echo "Project: $project_name"
+
+          repositories=$(echo "$project" | jq -c '.repositories[]')
+          while IFS= read -r repository; do
+              repo_name=$(echo "$repository" | jq -r '.name')
+              repo_url=$(echo "$repository" | jq -r '.url')
+              echo "  Repository: $repo_name, URL: $repo_url"
+          done <<< "$repositories"
+        done
+      env:
+        YOUR_JSON_FILE: Projects.json
+      shell: bash     
+      
+      
+      
+      
+      #- name: Print repositories
+       # run: |
+        #  while IFS= read -r line; do
+         #   project_name=$(echo $line | awk '{print $1}')
+          #  repo_info=$(echo $line | awk '{print $2}')
+           # repo_name=$(echo $repo_info | cut -d':' -f1)
+            #repo_url=$(echo $repo_info | cut -d':' -f2)
+            #echo "Project: $project_name, Repository: $repo_name, URL: $repo_url"
+          #done < project-repos.txt
