@@ -1,7 +1,10 @@
 name: Get Repositories
 
 on:
-  workflow_dispatch:
+  #workflow_dispatch:
+  push:
+    paths:
+      - Projects.json
 
 jobs:
  Install_gh_CLI:
@@ -21,7 +24,28 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install jq
         run: sudo apt-get install -y jq
+
+      - name: Read and process projects.json
+        id: process_json
+        run: |
+          FILE_PATH="Projects.json"
+          if [[ -f "$FILE_PATH" ]]; then
+            echo "Processing $FILE_PATH"
+            cat $FILE_PATH | jq -r '.projects[] | "\(.name) \(.repositories[] | "\(.name): \(.url)")"' > project-repos.txt
+          else
+            echo "$FILE_PATH not found!"
+            exit 1
+
+      - name: Print repositories
+        run: |
+          while IFS= read -r line; do
+            project_name=$(echo $line | awk '{print $1}')
+            repo_info=$(echo $line | awk '{print $2}')
+            repo_name=$(echo $repo_info | cut -d':' -f1)
+            repo_url=$(echo $repo_info | cut -d':' -f2)
+            echo "Project: $project_name, Repository: $repo_name, URL: $repo_url"
+          done < project-repos.txt
