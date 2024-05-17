@@ -33,7 +33,7 @@
 
 # All files in the repository
 #* @global-owner1 @global-owner2
-* @RafiCisco/projecta_admin 
+#* @RafiCisco/projecta_admin 
 
 # Specific directories
 #/docs/ @docs-team
