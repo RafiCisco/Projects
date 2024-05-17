@@ -32,7 +32,7 @@ jobs:
       - name: Read and process projects.json
         id: process_json
         run: |
-          FILE_PATH="Projects/Projects.json"
+          FILE_PATH="Projects.json"
           if [[ -f "$FILE_PATH" ]]; then
             echo "Processing $FILE_PATH"
             cat $FILE_PATH | jq -r '.projects[] | "\(.name) \(.repositories[] | "\(.name): \(.url)")"' > project-repos.txt
