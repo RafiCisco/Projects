@@ -50,8 +50,5 @@ jobs:
 
     - name: Print Projects, Repository Names and URLs
       run: |
-       #cat Projects.json | jq -r '.projects[] || "\(.name): \(.repositories[0].url)"' | awk '!seen[$0]++'
-       #cat Projects.json | jq -r '.projects[] | "\(.name): \(.repositories[].name) - \(.repositories[].url)"' | awk '!seen[$0]++'
        cat Projects.json | jq -r '.projects[] | "\(.name): \(.repositories[] | "\(.name) - \(.url)")"'
-
       shell: bash
