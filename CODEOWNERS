@@ -7,14 +7,14 @@
 * @Rafi98 
 #* @RafiCisco/projecta_admin
 
-README.md @RafiCisco/projecta_admin
+
 
 
 # Assign all files in the repository to both Admin and Dev teams
 #* @RafiCisco/projecta_admin @RafiCisco/projecta_admin 
 
 # Code owners for a specific directory
-#/docs/ @documentation-team
+/docs/ @RafiCisco/projecta_admin
 
 # Code owners for specific files
 #/src/main.js @js-owner
