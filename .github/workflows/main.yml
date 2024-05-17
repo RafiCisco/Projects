@@ -1,0 +1,43 @@
+name: Process Projects JSON
+
+on:
+  push:
+    paths:
+      - projects.json
+
+jobs:
+  process-projects:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Read and process projects.json
+        id: process_json
+        run: |
+          JSON_FILE="projects.json"
+          if [[ -f "$JSON_FILE" ]]; then
+            echo "Processing $JSON_FILE"
+            cat $JSON_FILE | jq -r '.projects[] | "\(.name) \(.repositories[] | "\(.name): \(.url)")"' > project-repos.txt
+          else
+            echo "$JSON_FILE not found!"
+            exit 1
+          
+          cat project-repos.txt
+
+      - name: Perform actions based on repositories
+        run: |
+          while IFS= read -r line; do
+            echo "Processing line: $line"
+            project_name=$(echo $line | awk '{print $1}')
+            repo_info=$(echo $line | awk '{print $2}')
+            repo_name=$(echo $repo_info | cut -d':' -f1)
+            repo_url=$(echo $repo_info | cut -d':' -f2)
+            echo "Project: $project_name, Repository: $repo_name, URL: $repo_url"
+            # Example action: Clone the repository
+            git clone $repo_url
+          done < project-repos.txt
