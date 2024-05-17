@@ -1,9 +1,10 @@
 name: Process Projects JSON
 
 on:
-  push:
-    paths:
-      - Projects.json
+ workflow_dispatch:
+  #push:
+    #paths:
+      #- Projects.json
 
 jobs:
   process-projects:
@@ -12,6 +13,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set Execute Permission
+        run: chmod +x Process.sh  
 
       - name: Install jq
         run: sudo apt-get install -y jq
