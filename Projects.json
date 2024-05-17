@@ -1,0 +1,109 @@
+{
+    "projects": [
+      {
+        "name": "Project_A",
+        "repositories": [
+          {
+            "name": "RepoA1",
+            "url": "https://github.com/RafiCisco/RepoA1"
+          },
+          {
+            "name": "RepoA2",
+            "url": "https://github.com/RafiCisco/RepoA2"
+          },
+          {
+            "name": "RepoA3",
+            "url": "https://github.com/RafiCisco/RepoA3"
+          },
+          {
+            "name": "RepoA4",
+            "url": "https://github.com/RafiCisco/RepoA4"
+          },
+          {
+            "name": "RepoA5",
+            "url": "https://github.com/RafiCisco/RepoA5"
+          }
+         ]
+       },
+      {
+        "name": "Project_B",
+        "repositories": [
+          {
+            "name": "RepoB1",
+            "url": "https://github.com/RafiCisco/RepoB1"
+          },
+          {
+            "name": "RepoB2",
+            "url": "https://github.com/RafiCisco/RepoB2"
+          },
+          {
+            "name": "RepoB3",
+            "url": "https://github.com/RafiCisco/RepoB3"
+          },
+          {
+            "name": "RepoB4",
+            "url": "https://github.com/RafiCisco/RepoB4"
+          }
+         ]
+       },
+       {
+        "name": "Project_C",
+        "repositories": [
+          {
+            "name": "RepoC1",
+            "url": "https://github.com/RafiCisco/RepoC1"
+          },
+          {
+            "name": "RepoC2",
+            "url": "https://github.com/RafiCisco/RepoC2"
+          },
+          {
+            "name": "RepoC3",
+            "url": "https://github.com/RafiCisco/RepoC3"
+          },
+          {
+            "name": "RepoC4",
+            "url": "https://github.com/RafiCisco/RepoC4"
+          }
+         ]
+       },
+       {
+        "name": "Project_D",
+        "repositories": [
+          {
+            "name": "RepoD1",
+            "url": "https://github.com/RafiCisco/RepoD1"
+          },
+          {
+            "name": "RepoD2",
+            "url": "https://github.com/RafiCisco/RepoD2"
+          },
+          {
+            "name": "RepoD3",
+            "url": "https://github.com/RafiCisco/RepoD3"
+          },
+          {
+            "name": "RepoD4",
+            "url": "https://github.com/RafiCisco/RepoD4"
+          }
+         ]
+       },
+       {
+        "name": "Project_E",
+        "repositories": [
+          {
+            "name": "RepoE1",
+            "url": "https://github.com/RafiCisco/RepoE1"
+          },
+          {
+            "name": "RepoE2",
+            "url": "https://github.com/RafiCisco/RepoE2"
+          },
+          {
+            "name": "RepoE3",
+            "url": "https://github.com/RafiCisco/RepoE3"
+          }
+        ]    
+       }
+    ]
+}
