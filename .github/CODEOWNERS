@@ -5,7 +5,7 @@
 # Code owners for the entire repository
 #* @global-owner1 @global-owner2
 * @Rafi98 
-#* @ProjectA_admin
+* @RafiCisco/projecta_admin 
 
 
 # Individual file owner
