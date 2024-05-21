@@ -9,7 +9,20 @@ declare -A repos_teams=(
   ["RepoA1"]="admin:admin dev:push"
   ["RepoA2"]="admin:admin dev:push"
   ["RepoA3"]="admin:admin dev:push"
-  )
+  ["RepoA4"]="admin:admin dev:push"
+  ["RepoA5"]="admin:admin dev:push"
+  ["RepoB1"]="admin:admin dev:push"
+  ["RepoB2"]="admin:admin dev:push"
+  ["RepoB3"]="admin:admin dev:push"
+  ["RepoB4"]="admin:admin dev:push"
+  
+)
+
+# Define projects and their corresponding repositories
+declare -A projects_repos=(
+  ["Project_A"]="RepoA1 RepoA2 RepoA3 RepoA4 RepoA5"
+  ["Project_B"]="RepoB1 RepoB2 RepoB3 RepoB4"
+)
 
 # Function to create a team
 create_team() {
@@ -19,7 +32,7 @@ create_team() {
   echo "Creating team $team_name..."
 
   RESPONSE=$(curl -s -X POST \
-    -H "Authorization: token $gh_token" \
+    -H "Authorization: token $GITHUB_TOKEN" \
     -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/orgs/$GITHUB_ORG/teams \
     -d "{\"name\":\"$team_name\", \"description\":\"$team_description\"}")
@@ -56,6 +69,53 @@ add_team_to_repo() {
   fi
 }
 
+# Function to create a project
+create_project() {
+  local project_name=$1
+
+  echo "Creating project $project_name..."
+
+  RESPONSE=$(curl -s -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.inertia-preview+json" \
+    https://api.github.com/orgs/$GITHUB_ORG/projects \
+    -d "{\"name\":\"$project_name\"}")
+
+  PROJECT_ID=$(echo $RESPONSE | jq -r '.id')
+
+  if [ "$PROJECT_ID" == "null" ]; then
+    echo "Failed to create project. Response: $RESPONSE"
+    exit 1
+  else
+    echo "Project created with ID: $PROJECT_ID"
+  fi
+}
+
+# Function to add repositories to a project
+add_repos_to_project() {
+  local project_id=$1
+  shift
+  local repos=("$@")
+
+  echo "Adding repositories ${repos[*]} to project $project_id..."
+
+  for repo in "${repos[@]}"; do
+    RESPONSE=$(curl -s -X POST \
+      -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github.inertia-preview+json" \
+      https://api.github.com/projects/$project_id/columns \
+      -d "{\"name\":\"$repo\"}")
+
+    COLUMN_ID=$(echo $RESPONSE | jq -r '.id')
+
+    if [ "$COLUMN_ID" == "null" ]; then
+      echo "Failed to add repository $repo to project. Response: $RESPONSE"
+    else
+      echo "Repository $repo added to project $project_id."
+    fi
+  done
+}
+
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
   echo "jq is required but it's not installed. Install jq and try again."
@@ -76,6 +136,13 @@ for repo in "${!repos_teams[@]}"; do
     team_slug=$(echo "$team_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
     add_team_to_repo "$team_slug" "$repo" "$permission"
   done
+done
+
+# Create projects and add repositories to them
+for project_name in "${!projects_repos[@]}"; do
+  create_project "$project_name"
+  project_id=$PROJECT_ID
+  add_repos_to_project "$project_id" ${projects_repos[$project_name]}
 done
 
 echo "Done."
