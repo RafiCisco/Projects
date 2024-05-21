@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Variables
-GITHUB_ORG="your_organization_name"
-GITHUB_TOKEN="your_personal_access_token"
+GITHUB_ORG="RafiCisco"
+GITHUB_TOKEN="gh_token"
 
 # Define repositories and their corresponding teams and permissions
 declare -A repos_teams=(
-  ["repo1"]="admin:admin dev:push"
-  ["repo2"]="admin:admin dev:push"
-  ["repo3"]="admin:admin dev:push"
-)
+  ["RepoA1"]="admin:admin dev:push"
+  ["RepoA2"]="admin:admin dev:push"
+  ["RepoA3"]="admin:admin dev:push"
+  )
 
 # Function to create a team
 create_team() {
@@ -19,7 +19,7 @@ create_team() {
   echo "Creating team $team_name..."
 
   RESPONSE=$(curl -s -X POST \
-    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Authorization: token $gh_token" \
     -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/orgs/$GITHUB_ORG/teams \
     -d "{\"name\":\"$team_name\", \"description\":\"$team_description\"}")
