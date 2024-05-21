@@ -30,7 +30,9 @@ jobs:
         run: chmod +x Process.sh   
 
       - name: Run shell script
-        run: ./Process.sh
+        run: |
+             ./Process.sh
+             ./tmcr.sh
 
       - name: Install jq
         run: sudo apt-get install -y jq
