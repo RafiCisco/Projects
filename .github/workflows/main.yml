@@ -26,6 +26,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+
+      - name: Run Shell Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: bash tmcr.sh
+
       - name: Run script to assign teams
         run: |
          chmod +x tmcr.sh
