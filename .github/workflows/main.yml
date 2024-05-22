@@ -30,8 +30,8 @@ jobs:
         run: |
          chmod +x tmcr.sh
          ./tmcr.sh
-        env:
-         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+       # env:
+        # GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
        
 
