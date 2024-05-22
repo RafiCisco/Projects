@@ -42,10 +42,14 @@ jobs:
           && sudo apt update \
           && sudo apt install gh -y
 
-
-
+      - name: Log in to GitHub
         env:
-           GH_TOKEN: ${{ secrets.gh_token }}
+          GH_TOKEN: ${{ secrets.gh_token }}
+        run: |
+          gh auth login --with-token <<<"${gh_token}"
+
+
+       
 
       - name: Make script executable
         run: |
