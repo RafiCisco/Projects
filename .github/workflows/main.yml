@@ -29,16 +29,14 @@ jobs:
 
       - name: Run Bash Script
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: bash tmcr.sh $GITHUB_TOKEN
 
       - name: Run script to assign teams
         run: |
          chmod +x tmcr.sh
          ./tmcr.sh
-        env:
-         bash Projects/tmcr.sh TOKEN: ${{ secrets.GH_PAT }}
-
+        
        
 
      # - name: Make script executable
