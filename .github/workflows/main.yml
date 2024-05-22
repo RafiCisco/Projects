@@ -19,7 +19,7 @@ jobs:
    steps:
       - name: Log in to GitHub
         env:
-          GH_TOKEN: ${{ secrets.gh_token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           gh auth login --with-token <<<"${GH_TOKEN}"
     
