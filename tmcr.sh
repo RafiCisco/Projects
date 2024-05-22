@@ -9,10 +9,41 @@ TOKEN="$1"
 # Now you can use $TOKEN in your script for making GitHub API requests or other operations
 echo "GitHub Token: $TOKEN"
 
-# Create Admin Team
-ADMIN_TEAM_ID=$(curl -X POST -H "Authorization: token $TOKEN" -d '{"name": "admin", "permission": "admin"}' "https://api.github.com/orgs/$ORGANIZATION/teams" | jq -r '.id')
+# Team names
+TEAM1_NAME="team1"
+TEAM2_NAME="team2"
+
+# Team descriptions (optional)
+TEAM1_DESCRIPTION="Team 1 description"
+TEAM2_DESCRIPTION="Team 2 description"
+
+# Create Team 1
+response1=$(curl -X POST \
+  -H "Authorization: token $TOKEN" \
+  -d "{\"name\": \"$TEAM1_NAME\", \"description\": \"$TEAM1_DESCRIPTION\"}" \
+  "https://api.github.com/orgs/$ORGANIZATION/teams")
 
 
+# Extract Team 1 ID
+TEAM1_ID=$(echo "$response1" | jq -r '.id')
 
+echo "Team 1 created with ID: $TEAM1_ID"
 
+# Create Team 2
+response2=$(curl -X POST \
+  -H "Authorization: token $TOKEN" \
+  -d "{\"name\": \"$TEAM2_NAME\", \"description\": \"$TEAM2_DESCRIPTION\"}" \
+  "https://api.github.com/orgs/$ORGANIZATION/teams")
 
+# Extract Team 2 ID
+TEAM2_ID=$(echo "$response2" | jq -r '.id')
+
+echo "Team 2 created with ID: $TEAM2_ID"
+
+# Display Team 1
+echo "Team 1:"
+curl -H "Authorization: token $TOKEN" "https://api.github.com/teams/$TEAM1_ID" | jq .
+
+# Display Team 2
+echo "Team 2:"
+curl -H "Authorization: token $TOKEN" "https://api.github.com/teams/$TEAM2_ID" | jq .
