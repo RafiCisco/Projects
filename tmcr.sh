@@ -9,12 +9,16 @@ create_team() {
   local team_name=$1
   local team_slug=$(echo "$team_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
   
-  # Make API request to create team
+  # Make API request to create team and print the raw response
   create_team_response=$(curl -s -X POST \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Accept: application/vnd.github.v3+json" \
     "https://api.github.com/orgs/$ORG/teams" \
     -d "{\"name\": \"$team_name\", \"description\": \"Team description\", \"privacy\": \"closed\"}")
+  
+  # Print the raw JSON response
+  echo "Create Team Response:"
+  echo "$create_team_response"
   
   # Extract team ID from response
   team_id=$(echo "$create_team_response" | jq -r '.id')
