@@ -31,14 +31,14 @@ jobs:
       - name: Make script executable
         run: |
              chmod +x Process.sh  
-             chmod +x list_teams.sh
              chmod +x tmcr.sh
+             #chmod +x list_teams.sh
              
       - name: Run shell script
         run: |
              ./Process.sh
-             ./list_teams.sh
              ./tmcr.sh
+             #./list_teams.sh
              
 
       - name: Install jq
