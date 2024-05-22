@@ -2,7 +2,9 @@
 
 # Variables
 GITHUB_ORG="RafiCisco"
-GITHUB_TOKEN="GH_TOKEN"
+#GITHUB_TOKEN="GH_TOKEN" # Repository token
+GITHUB_TOKEN="GH_PAT" # PAT
+
 
 # Define repositories and their corresponding teams and permissions
 declare -A repos_teams=(
