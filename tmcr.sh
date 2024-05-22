@@ -1,74 +1,45 @@
 #!/bin/bash
 
-# GitHub organization details
+# GitHub variables
 ORG="RafiCisco"
 GITHUB_TOKEN="GH_PAT"
 
 # Function to create a team
 create_team() {
-  local team_name=$1
-  
-  # Make API request to create team
-  create_team_response=$(curl -L -s -X POST \
-    -H "Authorization: Bearer $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/orgs/$ORG/teams" \
-    -d "{\"name\": \"$team_name\", \"description\": \"$team_name team\", \"privacy\": \"closed\"}")
-
-     
-  # Extract team ID from response
-  team_id=$(echo "$create_team_response" | jq -r '.[].id')
-  echo "$team_id"
+    team_name="$1"
+    description="$2"
+    privacy="$3"
+    curl -L -s -X POST \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        "https://api.github.com/orgs/$ORG/teams" \
+        -d "{\"name\": \"$team_name\", \"description\": \"$description\", \"privacy\": \"$privacy\"}"
 }
 
-# Function to get project IDs
-get_project_ids() {
-  # Make API request to get projects
-  projects_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    "https://api.github.com/orgs/$ORG/projects")
-
-   
-  # Extract project IDs from response
-  project_ids=$(echo "$projects_response" | jq -r '.[].id')
-  echo "$project_ids"
+# Function to add members to a team
+add_members_to_team() {
+    team_id="$1"
+    members="$2"
+    curl -L -s -X PUT \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/teams/$team_id/memberships/$members"
 }
 
-# Function to get repository IDs in a project
-get_repo_ids() {
-  local project_id=$1
-  
-  # Make API request to get repositories in project
-  repos_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    "https://api.github.com/projects/$project_id/repos")
-  
-  # Extract repository IDs from response
-  repo_ids=$(echo "$repos_response" | jq -r '.[].id')
-  echo "$repo_ids"
+# Function to add a team to a repository
+add_team_to_repo() {
+    team_id="$1"
+    repo="$2"
+    permission="$3"
+    curl -L -s -X PUT \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/teams/$team_id/repos/$ORG/$repo" \
+        -d "{\"permission\": \"$permission\"}"
 }
 
-# Function to assign team to repositories
-assign_team_to_repos() {
-  local team_id=$1
-  local repo_ids=$2
-  
-  # Loop through repository IDs and assign team to each repository
-  for repo_id in $repo_ids; do
-    # Make API request to assign team to repository
-    curl -s -X PUT \
-      -H "Authorization: token $GITHUB_TOKEN" \
-      -H "Accept: application/vnd.github.v3+json" \
-      "https://api.github.com/teams/$team_id/repos/$ORG/$repo_id" \
-      -d '{"permission": "push"}'
-  done
-}
-
-# Example usage: Create teams and assign them to repositories
-team_id=$(create_team "admin")
-project_ids=$(get_project_ids)
-
-# Loop through project IDs
-for project_id in $project_ids; do
-  repo_ids=$(get_repo_ids "$project_id")
-  assign_team_to_repos "$team_id" "$repo_ids"
-done
+# Example usage
+create_team "team_name" "Description of the team" "closed"
+add_members_to_team "team_id" "username"
+add_team_to_repo "team_id" "repo_name" "admin"
