@@ -1,164 +1,120 @@
 #!/bin/bash
 
-# Variables
-GITHUB_ORG="RafiCisco"
-#GITHUB_TOKEN="GH_TOKEN" # Repository token
-GITHUB_TOKEN="GH_PAT" # PAT
+# GitHub organization details
+ORG="RafiCisco"
+GITHUB_TOKEN="GH_PAT"
+PROJECT_NAME="Project_A"
 
+# Team details
+TEAM_NAMES=("admin" "dev")
 
-# Define repositories and their corresponding teams and permissions
-declare -A repos_teams=(
-  ["RepoA1"]="admin:admin dev:write"
-  ["RepoA2"]="admin:admin dev:write"
-  ["RepoA3"]="admin:admin dev:write"
-  ["RepoA4"]="admin:admin dev:write"
-  ["RepoA5"]="admin:admin dev:write"
-  ["RepoB1"]="admin:admin dev:write"
-  ["RepoB2"]="admin:admin dev:write"
-  ["RepoB3"]="admin:admin dev:write"
-  ["RepoB4"]="admin:admin dev:write"
-)
-
-# Define projects and their corresponding repositories
-declare -A projects_repos=(
-  ["Project_A"]="RepoA1 RepoA2 RepoA3 RepoA4 RepoA5"
-  ["Project_B"]="RepoB1 RepoB2 RepoB3 RepoB4"
-)
+# Repository details
+REPO_NAMES=("RepoA1" "RepoA2" "RepoA3")
 
 # Function to create a team
 create_team() {
   local team_name=$1
-  local team_description=$2
-
-  # Clear the GH_TOKEN environment variable if set
-unset GH_TOKEN
-
-if ! command -v gh &> /dev/null; then
-    echo "GitHub CLI not found. Installing..."
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-    sudo apt-add-repository https://cli.github.com/packages
-    sudo apt update
-    sudo apt install gh
-fi
-
-# Function to authenticate with GitHub using GitHub CLI
-authenticate_github() {
-    echo "Authenticating with GitHub..."
-    echo $GITHUB_TOKEN | gh auth login --with-token
-    if [ $? -eq 0 ]; then
-        echo "Authentication successful."
-    else
-        echo "Failed to authenticate with GitHub."
-        exit 1
-    fi
-}
-
-
-
-
-# Authenticate with GitHub using GitHub CLI
-#echo "Authenticating with GitHub..."
-#gh auth login --with-token << EOF
-#$GITHUB_TOKEN
-#EOF
-
-# Check if authentication was successful
-#if [ $? -eq 0 ]; then
- #   echo "Authentication successful."
-#else
- #   echo "Failed to authenticate with GitHub."
-#fi
-
-
-
-
-# Authenticate with GitHub
-#gh auth login --with-token <<<"$GITHUB_TOKEN"
-
-# Create a GitHub team using the GitHub API directly
-gh api "/orgs/$GITHUB_ORG/teams" -X POST -F name="$team_name" -F description="$team_description"
-
-# Create a GitHub team
-#gh api --silent -X POST "/orgs/$GITHUB_ORG/teams" -d "{\"name\":\"$team_name\", \"description\":\"$team_description\"}"
-
-  if [ $? -ne 0 ]; then
-    echo "Failed to create team."
-    exit 1
+  local team_slug=$(echo "$team_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  
+  create_team_response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/orgs/$ORG/teams" \
+    -d "{\"name\": \"$team_name\", \"description\": \"A new team\", \"privacy\": \"closed\"}")
+  
+  if [ "$create_team_response" -eq 201 ]; then
+    echo "Team $team_name created successfully."
   else
-    echo "Team created: $team_name"
+    echo "Failed to create team $team_name. HTTP Status: $create_team_response"
   fi
 }
 
-# Function to add a team to a repository with a specific permission
-add_team_to_repo() {
-  local team_slug=$1
+# Function to assign a team to a repository
+assign_team_to_repo() {
+  local team_name=$1
   local repo_name=$2
   local permission=$3
-
-  echo "Adding team $team_slug to repository $repo_name with $permission permission..."
-
-  github teams add-repo --org $GITHUB_ORG --team "$team_slug" --repo "$repo_name" --permission "$permission"
-
-  if [ $? -ne 0 ]; then
-    echo "Failed to add team to repository."
-    exit 1
+  
+  local team_slug=$(echo "$team_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  
+  assign_team_response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/orgs/$ORG/teams/$team_slug/repos/$ORG/$repo_name" \
+    -d "{\"permission\": \"$permission\"}")
+  
+  if [ "$assign_team_response" -eq 204 ]; then
+    echo "Team $team_name assigned to repository $repo_name successfully."
   else
-    echo "Team $team_slug added to repository $repo_name with $permission permission."
+    echo "Failed to assign team $team_name to repository $repo_name. HTTP Status: $assign_team_response"
   fi
 }
 
 # Function to create a project
 create_project() {
   local project_name=$1
+  
+  create_project_response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/orgs/$ORG/projects" \
+    -d "{\"name\": \"$project_name\"}")
 
-  echo "Creating project $project_name..."
-
-  github gh api -X POST orgs/$GITHUB_ORG/projects -F name="$project_name"
-
-  if [ $? -ne 0 ]; then
-    echo "Failed to create project."
-    exit 1
+  if [ "$create_project_response" -eq 201 ]; then
+    echo "Project $project_name created successfully."
   else
-    echo "Project created: $project_name"
+    echo "Failed to create project $project_name. HTTP Status: $create_project_response"
   fi
 }
 
-# Function to add repositories to a project
-add_repos_to_project() {
+# Function to get project ID
+get_project_id() {
   local project_name=$1
-  shift
-  local repos=("$@")
 
-  echo "Adding repositories ${repos[*]} to project $project_name..."
+  project_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.inertia-preview+json" \
+    "https://api.github.com/orgs/$ORG/projects" | jq -r ".[] | select(.name == \"$project_name\") | .id")
 
-  for repo in "${repos[@]}"; do
-    github projects create-column --project "$project_name" --name "$repo"
-    if [ $? -ne 0 ]; then
-      echo "Failed to add repository $repo to project."
-      exit 1
-    else
-      echo "Repository $repo added to project $project_name."
-    fi
-  done
+  echo "$project_id"
 }
 
-# Main script
-for team_name in "${!repos_teams[@]}"; do
-  create_team "$team_name" "${repos_teams[$team_name]}"
+# Create teams
+for team_name in "${TEAM_NAMES[@]}"; do
+  create_team "$team_name"
 done
 
-for team_slug in "${!repos_teams[@]}"; do
-  for repo_permission in ${repos_teams[$team_slug]}; do
-    IFS=':' read -r -a repo_permission_arr <<< "$repo_permission"
-    repo_name="${repo_permission_arr[0]}"
-    permission="${repo_permission_arr[1]}"
-    add_team_to_repo "$team_slug" "$repo_name" "$permission"
+# Create the project
+create_project "$PROJECT_NAME"
+
+# Get the project ID
+project_id=$(get_project_id "$PROJECT_NAME")
+
+# Assign teams to repositories within the project
+for repo_name in "${REPO_NAMES[@]}"; do
+  for team_name in "${TEAM_NAMES[@]}"; do
+    assign_team_to_repo "$team_name" "$repo_name" "push"
   done
 done
 
-for project_name in "${!projects_repos[@]}"; do
-  create_project "$project_name"
-  add_repos_to_project "$project_name" ${projects_repos[$project_name]}
-done
+# Function to add repositories to a project
+add_repo_to_project() {
+  local project_id=$1
+  local repo_name=$2
 
-echo "All teams created, assigned to repositories, and projects created."
+  add_repo_response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.inertia-preview+json" \
+    "https://api.github.com/projects/$project_id/columns" \
+    -d "{\"name\": \"$repo_name\", \"position\": 1}")
+
+  if [ "$add_repo_response" -eq 201 ]; then
+    echo "Repository $repo_name added to project $PROJECT_NAME successfully."
+  else
+    echo "Failed to add repository $repo_name to project $PROJECT_NAME. HTTP Status: $add_repo_response"
+  fi
+}
+
+# Add repositories to the project
+for repo_name in "${REPO_NAMES[@]}"; do
+  add_repo_to_project "$project_id" "$repo_name"
+done
