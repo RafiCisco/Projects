@@ -2,20 +2,20 @@
 
 # Variables
 GITHUB_ORG="RafiCisco"
-GITHUB_TOKEN="gh_token"
+GITHUB_TOKEN=$1
 
 # Define repositories and their corresponding teams and permissions
 declare -A repos_teams=(
-  ["RepoA1"]="admin:admin dev:push"
-  ["RepoA2"]="admin:admin dev:push"
-  ["RepoA3"]="admin:admin dev:push"
-  ["RepoA4"]="admin:admin dev:push"
-  ["RepoA5"]="admin:admin dev:push"
-  ["RepoB1"]="admin:admin dev:push"
-  ["RepoB2"]="admin:admin dev:push"
-  ["RepoB3"]="admin:admin dev:push"
-  ["RepoB4"]="admin:admin dev:push"
-  
+  ["RepoA1"]="admin:admin dev:write"
+  ["RepoA2"]="admin:admin dev:write"
+  ["RepoA3"]="admin:admin dev:write"
+  ["RepoA4"]="admin:admin dev:write"
+  ["RepoA5"]="admin:admin dev:write"
+  ["RepoB1"]="admin:admin dev:write"
+  ["RepoB2"]="admin:admin dev:write"
+  ["RepoB3"]="admin:admin dev:write"
+  ["RepoB4"]="admin:admin dev:write"
+
 )
 
 # Define projects and their corresponding repositories
@@ -45,6 +45,8 @@ create_team() {
   else
     echo "Team created with slug: $TEAM_SLUG"
   fi
+
+  echo $TEAM_SLUG
 }
 
 # Function to add a team to a repository with a specific permission
@@ -89,6 +91,8 @@ create_project() {
   else
     echo "Project created with ID: $PROJECT_ID"
   fi
+
+  echo $PROJECT_ID
 }
 
 # Function to add repositories to a project
@@ -122,27 +126,25 @@ if ! command -v jq &> /dev/null; then
   exit 1
 fi
 
-# Create teams
-create_team "admin" "Admin team with full access"
-create_team "dev" "Dev team with push access"
+# Create teams and get their slugs
+admin_team_slug=$(create_team "admin" "Admin team with full access")
+dev_team_slug=$(create_team "dev" "Dev team with write access")
 
 # Add teams to repositories with specified permissions
 for repo in "${!repos_teams[@]}"; do
   IFS=' ' read -r -a teams <<< "${repos_teams[$repo]}"
   for team_info in "${teams[@]}"; do
     IFS=':' read -r -a team_permission <<< "$team_info"
-    team_name=${team_permission[0]}
+    team_slug=$(eval echo \${${team_permission[0]}_team_slug})
     permission=${team_permission[1]}
-    team_slug=$(echo "$team_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
     add_team_to_repo "$team_slug" "$repo" "$permission"
   done
 done
 
 # Create projects and add repositories to them
 for project_name in "${!projects_repos[@]}"; do
-  create_project "$project_name"
-  project_id=$PROJECT_ID
+  project_id=$(create_project "$project_name")
   add_repos_to_project "$project_id" ${projects_repos[$project_name]}
 done
 
-echo "Done."
+echo "All teams created, assigned to repositories, and projects created."
