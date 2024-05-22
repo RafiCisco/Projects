@@ -15,7 +15,6 @@ declare -A repos_teams=(
   ["RepoB2"]="admin:admin dev:write"
   ["RepoB3"]="admin:admin dev:write"
   ["RepoB4"]="admin:admin dev:write"
-
 )
 
 # Define projects and their corresponding repositories
