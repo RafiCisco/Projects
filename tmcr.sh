@@ -2,7 +2,7 @@
 
 # GitHub variables
 ORG="RafiCisco"
-GITHUB_TOKEN="GH_PAT"
+GITHUB_TOKEN="gh_token"
 
 # Function to create a team
 create_team() {
