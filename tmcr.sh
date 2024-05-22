@@ -3,98 +3,69 @@
 # GitHub organization details
 ORG="RafiCisco"
 GITHUB_TOKEN="GH_PAT"
-PROJECT_NAME="Project_A"
 
-# Function to check if team exists
-team_exists() {
+# Function to create a team
+create_team() {
   local team_name=$1
   
-  # Make API request to check if team exists
-  team_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    "https://api.github.com/orgs/$ORG/teams/$team_name")
+  # Make API request to create team
+  create_team_response=$(curl -s -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/orgs/$ORG/teams" \
+    -d "{\"name\": \"$team_name\", \"description\": \"$team_name team\", \"privacy\": \"closed\"}")
   
-  # Check if team exists
-  if [ "$(echo "$team_response" | jq -r '.message')" == "Not Found" ]; then
-    echo "false"
-  else
-    echo "true"
-  fi
+  # Extract team ID from response
+  team_id=$(echo "$create_team_response" | jq -r '.id')
+  echo "$team_id"
 }
 
-# Function to create a team if it doesn't exist
-create_team_if_not_exists() {
-  local team_name=$1
+# Function to get project IDs
+get_project_ids() {
+  # Make API request to get projects
+  projects_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    "https://api.github.com/orgs/$ORG/projects")
   
-  # Check if team exists
-  if [ "$(team_exists "$team_name")" == "false" ]; then
-    # Make API request to create team
-    team_response=$(curl -s -X POST \
-      -H "Authorization: token $GITHUB_TOKEN" \
-      -H "Accept: application/vnd.github.v3+json" \
-      "https://api.github.com/orgs/$ORG/teams" \
-      -d "{\"name\": \"$team_name\", \"description\": \"$team_name team\", \"privacy\": \"closed\"}")
-    
-    # Extract team ID from response
-    team_id=$(echo "$team_response" | jq -r '.id')
-    echo "$team_id"
-  fi
+  # Extract project IDs from response
+  project_ids=$(echo "$projects_response" | jq -r '.[].id')
+  echo "$project_ids"
 }
 
 # Function to get repository IDs in a project
-get_project_repos() {
-  local project_name=$1
+get_repo_ids() {
+  local project_id=$1
   
-  # Make API request to get project details
-  project_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    "https://api.github.com/orgs/$ORG/projects" | jq -r --arg project_name "$project_name" '.[] | select(.name == $project_name) | .id')
-  
-  # Get project ID from response
-  project_id=$(echo "$project_response" | jq -r '.id')
-  
-  # Make API request to get repository IDs in project
+  # Make API request to get repositories in project
   repos_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
     "https://api.github.com/projects/$project_id/repos")
   
-  # Extract repository names from response
-  repo_names=$(echo "$repos_response" | jq -r '.[].name')
-  echo "$repo_names"
+  # Extract repository IDs from response
+  repo_ids=$(echo "$repos_response" | jq -r '.[].id')
+  echo "$repo_ids"
 }
 
-# Function to assign team to repository
-assign_team_to_repo() {
-  local team_name=$1
-  local repo_name=$2
-  local permission=$3
+# Function to assign team to repositories
+assign_team_to_repos() {
+  local team_id=$1
+  local repo_ids=$2
   
-  # Create team if it doesn't exist
-  team_id=$(create_team_if_not_exists "$team_name")
-  
-  # Make sure team was created successfully
-  if [ -z "$team_id" ]; then
-    echo "Failed to create team '$team_name'."
-    exit 1
-  fi
-  
-  # Make API request to assign team to repository
-  assign_team_response=$(curl -s -X PUT \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
-    "https://api.github.com/teams/$team_id/repos/$ORG/$repo_name" \
-    -d "{\"permission\": \"$permission\"}")
-  
-  # Check if the assignment was successful
-  if [ "$(echo "$assign_team_response" | jq -r '.message')" == "Not Found" ]; then
-    echo "Failed to assign repository '$repo_name' to team '$team_name'. Response from GitHub: $assign_team_response"
-  else
-    echo "Team '$team_name' assigned to repository '$repo_name' successfully."
-  fi
+  # Loop through repository IDs and assign team to each repository
+  for repo_id in $repo_ids; do
+    # Make API request to assign team to repository
+    curl -s -X PUT \
+      -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github.v3+json" \
+      "https://api.github.com/teams/$team_id/repos/$ORG/$repo_id" \
+      -d '{"permission": "push"}'
+  done
 }
 
-# Example usage: Assign teams to repositories in Project_A
-repos=$(get_project_repos "$PROJECT_NAME")
+# Example usage: Create teams and assign them to repositories
+team_id=$(create_team "admin")
+project_ids=$(get_project_ids)
 
-# Assign teams to each repository in the project
-for repo in $repos; do
-  assign_team_to_repo "admin" "$repo" "admin"
-  assign_team_to_repo "dev" "$repo" "push"
+# Loop through project IDs
+for project_id in $project_ids; do
+  repo_ids=$(get_repo_ids "$project_id")
+  assign_team_to_repos "$team_id" "$repo_ids"
 done
