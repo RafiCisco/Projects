@@ -26,18 +26,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Run script to assign teams
+        run: |
+         chmod +x tmcr.sh
+         ./tmcr.sh
+        env:
+         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
        
 
       - name: Make script executable
         run: |
              #chmod +x Process.sh  
-             chmod +x tmcr.sh
+             #chmod +x tmcr.sh
              #chmod +x list_teams.sh
              
       - name: Run shell script
         run: |
              #./Process.sh
-             ./tmcr.sh
+             #./tmcr.sh
              #./list_teams.sh
              
 
