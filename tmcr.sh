@@ -3,7 +3,7 @@
 
 # Variables
 GITHUB_ORG="RafiCisco"
-GITHUB_TOKEN=""
+GITHUB_TOKEN="GH_ORGT"
 
 # Define repositories and their corresponding teams and permissions
 declare -A repos_teams=(
