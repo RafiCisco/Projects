@@ -16,7 +16,7 @@ create_team() {
     -d "{\"name\": \"$team_name\", \"description\": \"$team_name team\", \"privacy\": \"closed\"}")
   
   # Extract team ID from response
-  team_id=$(echo "$create_team_response" | jq -r '.id')
+  team_id=$(echo "$create_team_response" | jq -r '.[].id')
   echo "$team_id"
 }
 
