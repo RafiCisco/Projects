@@ -10,9 +10,11 @@ create_team() {
     description="$2"
     privacy="$3"
 
-    response=$(curl -s -X POST \
+    response=$(curl -L -s \
+         -X POST \
         -H "Authorization: Bearer $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
         "https://api.github.com/orgs/$ORG/teams" \
         -d "{\"name\": \"$team_name\", \"description\": \"$description\", \"privacy\": \"$privacy\"}")
 
