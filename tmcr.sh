@@ -30,6 +30,9 @@ create_team() {
   local team_name=$1
   local team_description=$2
 
+  # Clear the GH_TOKEN environment variable if set
+unset GH_TOKEN
+
 if ! command -v gh &> /dev/null; then
     echo "GitHub CLI not found. Installing..."
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
@@ -38,8 +41,20 @@ if ! command -v gh &> /dev/null; then
     sudo apt install gh
 fi
 
+echo "Authenticating with GitHub..."
+echo "$GITHUB_TOKEN" | gh auth login --with-token -
+
+# Check if authentication was successful
+if [ $? -eq 0 ]; then
+    echo "Authentication successful."
+else
+    echo "Failed to authenticate with GitHub."
+fi
+
+
+
 # Authenticate with GitHub
-gh auth login --with-token <<<"$GITHUB_TOKEN"
+#gh auth login --with-token <<<"$GITHUB_TOKEN"
 
 # Create a GitHub team using the GitHub API directly
 gh api "/orgs/$GITHUB_ORG/teams" -X POST -F name="$team_name" -F description="$team_description"
