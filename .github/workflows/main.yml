@@ -1,17 +1,6 @@
 name: Get Repositories
-
 on:
   workflow_dispatch:
-    branches:
-        - main
-        - br1
-
-  
-  
-  ##workflow_dispatch:
-  #push:
-    #paths:
-      #- Projects.json
 
 jobs:
  Install_gh_CLI:
@@ -25,29 +14,17 @@ jobs:
           && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
           && sudo apt update \
           && sudo apt install gh -y
-
- process-projects:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install gh CLI
-        run: |
-          # Install gh CLI
-          sudo mkdir -p -m 755 /etc/apt/keyrings && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-          && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && sudo apt update \
-          && sudo apt install gh -y
-
+ login:
+   runs-on: ubuntu-latest
+   steps:
       - name: Log in to GitHub
         env:
           GH_TOKEN: ${{ secrets.gh_token }}
         run: |
           gh auth login --with-token <<<"${GH_TOKEN}"
-
+    
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
        
 
