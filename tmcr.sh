@@ -1,8 +1,13 @@
 #!/bin/bash
 
+# Prompt the user to enter the GitHub personal access token
+read -s -p "Enter your GitHub personal access token: " GITHUB_TOKEN
+
+# Export the token as an environment variable
+export GITHUB_TOKEN
 # Variables
 GITHUB_ORG="RafiCisco"
-GITHUB_TOKEN="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"
+#GITHUB_TOKEN="GH_PAT"
 
 # Define repositories and their corresponding teams and permissions
 declare -A repos_teams=(
