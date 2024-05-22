@@ -39,8 +39,11 @@ fi
 # Authenticate with GitHub
 gh auth login --with-token <<<"$GITHUB_TOKEN"
 
+# Create a GitHub team using the GitHub API directly
+gh api "/orgs/$GITHUB_ORG/teams" -X POST -F name="$team_name" -F description="$team_description"
+
 # Create a GitHub team
-gh api --silent -X POST "/orgs/$GITHUB_ORG/teams" -d "{\"name\":\"$team_name\", \"description\":\"$team_description\"}"
+#gh api --silent -X POST "/orgs/$GITHUB_ORG/teams" -d "{\"name\":\"$team_name\", \"description\":\"$team_description\"}"
 
   if [ $? -ne 0 ]; then
     echo "Failed to create team."
