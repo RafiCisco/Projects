@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# Prompt the user to enter the GitHub personal access token
-read -s -p "Enter your GitHub personal access token: " GITHUB_TOKEN
 
-# Export the token as an environment variable
-export GITHUB_TOKEN
 # Variables
 GITHUB_ORG="RafiCisco"
 #GITHUB_TOKEN="GH_PAT"
