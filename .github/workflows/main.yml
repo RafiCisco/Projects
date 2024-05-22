@@ -31,7 +31,7 @@ jobs:
          chmod +x tmcr.sh
          ./tmcr.sh
         env:
-         bash Projects/tmcr.sh TOKEN: ${{ secrets.GH_TOKEN }}
+         bash Projects/tmcr.sh TOKEN: ${{ secrets.GH_PAT }}
 
        
 
