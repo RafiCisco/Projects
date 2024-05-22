@@ -2,7 +2,8 @@
 
 # GitHub organization details
 ORG="RafiCisco"
-GITHUB_TOKEN="GH_PAT"
+#GITHUB_TOKEN="GH_PAT"
+GITHUB_TOKEN="GH_TOKEN"
 PROJECT_NAME="Project_A"
 
 # Team details
