@@ -7,22 +7,28 @@ GITHUB_TOKEN="GH_PAT"
 # Function to create a team
 create_team() {
   local team_name=$1
-  local team_slug=$(echo "$team_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
   
-  # Make API request to create team and print the raw response
-  create_team_response=$(curl -s -X POST \
+  # Make API request to create team
+  team_response=$(curl -s -X POST \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Accept: application/vnd.github.v3+json" \
     "https://api.github.com/orgs/$ORG/teams" \
-    -d "{\"name\": \"$team_name\", \"description\": \"Team description\", \"privacy\": \"closed\"}")
-  
-  # Print the raw JSON response
-  echo "Create Team Response:"
-  echo "$create_team_response"
+    -d "{\"name\": \"$team_name\", \"description\": \"$team_name team\", \"privacy\": \"closed\"}")
   
   # Extract team ID from response
-  team_id=$(echo "$create_team_response" | jq -r '.id')
+  team_id=$(echo "$team_response" | jq -r '.id')
   echo "$team_id"
+}
+
+# Function to get project ID
+get_project_id() {
+  local project_name=$1
+  
+  # Make API request to get project ID
+  project_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    "https://api.github.com/orgs/$ORG/projects" | jq -r --arg project_name "$project_name" '.[] | select(.name == $project_name) | .id')
+  
+  echo "$project_id"
 }
 
 # Function to get repository ID
@@ -58,8 +64,13 @@ assign_team_to_repo() {
   fi
 }
 
-# Example usage: Create a team and assign it to a repository
-team_id=$(create_team "Team1")
+# Example usage: Create teams (admin and dev) for RepoA1 of Project_A
+project_id=$(get_project_id "Project_A")
 
-# Assign the team to a repository with desired permission
-assign_team_to_repo "$team_id" "repo1" "admin"
+# Create teams
+admin_team_id=$(create_team "admin")
+dev_team_id=$(create_team "dev")
+
+# Assign teams to repository with appropriate permissions
+assign_team_to_repo "$admin_team_id" "RepoA1" "admin"
+assign_team_to_repo "$dev_team_id" "RepoA1" "push"
