@@ -9,37 +9,45 @@ create_team() {
     team_name="$1"
     description="$2"
     privacy="$3"
-    curl -L -s -X POST \
+
+    response=$(curl -s -X POST \
         -H "Authorization: Bearer $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github+json" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
         "https://api.github.com/orgs/$ORG/teams" \
-        -d "{\"name\": \"$team_name\", \"description\": \"$description\", \"privacy\": \"$privacy\"}"
-}
+        -d "{\"name\": \"$team_name\", \"description\": \"$description\", \"privacy\": \"$privacy\"}")
 
-# Function to add members to a team
-add_members_to_team() {
-    team_id="$1"
-    members="$2"
-    curl -L -s -X PUT \
-        -H "Authorization: Bearer $GITHUB_TOKEN" \
-        -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/teams/$team_id/memberships/$members"
+    # Extract the team slug from the response
+    team_slug=$(echo "$response" | jq -r '.slug')
+
+    echo "$team_slug"
 }
 
 # Function to add a team to a repository
 add_team_to_repo() {
-    team_id="$1"
+    team_slug="$1"
     repo="$2"
     permission="$3"
-    curl -L -s -X PUT \
+
+    curl -s -X PUT \
         -H "Authorization: Bearer $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/teams/$team_id/repos/$ORG/$repo" \
+        "https://api.github.com/orgs/$ORG/teams/$team_slug/repos/$ORG/$repo" \
         -d "{\"permission\": \"$permission\"}"
 }
 
-# Example usage
-create_team "team_name" "Description of the team" "closed"
-add_members_to_team "team_id" "username"
-add_team_to_repo "team_id" "repo_name" "admin"
+# Example usage: Create a team
+TEAM_NAME="admin"
+DESCRIPTION="Admin team"
+PRIVACY="closed"
+TEAM_SLUG=$(create_team "$TEAM_NAME" "$DESCRIPTION" "$PRIVACY")
+
+echo "Created team '$TEAM_NAME' with slug '$TEAM_SLUG'"
+
+# Example usage: Add team to repositories
+REPOSITORIES=("repo1" "repo2" "repo3")
+PERMISSION="admin"
+
+for REPO in "${REPOSITORIES[@]}"; do
+    add_team_to_repo "$TEAM_SLUG" "$REPO" "$PERMISSION"
+    echo "Added team '$TEAM_NAME' to repository '$REPO' with permission '$PERMISSION'"
+done
