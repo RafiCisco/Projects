@@ -6,15 +6,15 @@ GITHUB_TOKEN="GH_PAT"
 
 # Define repositories and their corresponding teams and permissions
 declare -A repos_teams=(
-  ["RepoA1"]="admin:admin dev:push"
-  ["RepoA2"]="admin:admin dev:push"
-  ["RepoA3"]="admin:admin dev:push"
-  ["RepoA4"]="admin:admin dev:push"
-  ["RepoA5"]="admin:admin dev:push"
-  ["RepoB1"]="admin:admin dev:push"
-  ["RepoB2"]="admin:admin dev:push"
-  ["RepoB3"]="admin:admin dev:push"
-  ["RepoB4"]="admin:admin dev:push"
+  ["RepoA1"]="admin:admin dev:write"
+  ["RepoA2"]="admin:admin dev:write"
+  ["RepoA3"]="admin:admin dev:write"
+  ["RepoA4"]="admin:admin dev:write"
+  ["RepoA5"]="admin:admin dev:write"
+  ["RepoB1"]="admin:admin dev:write"
+  ["RepoB2"]="admin:admin dev:write"
+  ["RepoB3"]="admin:admin dev:write"
+  ["RepoB4"]="admin:admin dev:write"
   
 )
 
