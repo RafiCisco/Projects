@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # GitHub organization details
-ORG="RafiCisco"
-GITHUB_TOKEN="Gh_PAT"
+ORG="YOUR_ORGANIZATION_NAME"
+GITHUB_TOKEN="YOUR_PERSONAL_ACCESS_TOKEN"
 
 # Function to create a team
 create_team() {
@@ -27,7 +27,7 @@ get_repo_id() {
   
   # Make API request to get repository ID
   repo_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    "https://api.github.com/repos/$ORG/$repo_name" )
+    "https://api.github.com/repos/$ORG/$repo_name" | jq -r '.id')
   
   echo "$repo_id"
 }
@@ -54,9 +54,8 @@ assign_team_to_repo() {
   fi
 }
 
-# Example usage: Create a team and assign it to repositories
+# Example usage: Create a team and assign it to a repository
 team_id=$(create_team "Team1")
 
-# Assign the team to repositories with desired permissions
+# Assign the team to a repository with desired permission
 assign_team_to_repo "$team_id" "repo1" "admin"
-assign_team_to_repo "$team_id" "repo2" "push"
