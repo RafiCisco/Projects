@@ -41,8 +41,11 @@ if ! command -v gh &> /dev/null; then
     sudo apt install gh
 fi
 
+# Authenticate with GitHub using GitHub CLI
 echo "Authenticating with GitHub..."
-echo "$GITHUB_TOKEN" | gh auth login --with-token -
+gh auth login --with-token << EOF
+$GITHUB_TOKEN
+EOF
 
 # Check if authentication was successful
 if [ $? -eq 0 ]; then
@@ -50,6 +53,7 @@ if [ $? -eq 0 ]; then
 else
     echo "Failed to authenticate with GitHub."
 fi
+
 
 
 
