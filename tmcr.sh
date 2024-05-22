@@ -9,12 +9,14 @@ create_team() {
   local team_name=$1
   
   # Make API request to create team
-  create_team_response=$(curl -s -X POST \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
+  create_team_response=$(curl -L -s -X POST \
+    -H "Authorization: Bearer $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/orgs/$ORG/teams" \
     -d "{\"name\": \"$team_name\", \"description\": \"$team_name team\", \"privacy\": \"closed\"}")
-  
+
+     
   # Extract team ID from response
   team_id=$(echo "$create_team_response" | jq -r '.[].id')
   echo "$team_id"
@@ -25,7 +27,8 @@ get_project_ids() {
   # Make API request to get projects
   projects_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
     "https://api.github.com/orgs/$ORG/projects")
-  
+
+   
   # Extract project IDs from response
   project_ids=$(echo "$projects_response" | jq -r '.[].id')
   echo "$project_ids"
