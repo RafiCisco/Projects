@@ -30,13 +30,16 @@ jobs:
 
       - name: Make script executable
         run: |
-             chmod +x Process.sh   
+             chmod +x Process.sh  
+             chmod +x list_teams.sh
              chmod +x tmcr.sh
              
       - name: Run shell script
         run: |
              ./Process.sh
+             ./list_teams.sh
              ./tmcr.sh
+             
 
       - name: Install jq
         run: sudo apt-get install -y jq
