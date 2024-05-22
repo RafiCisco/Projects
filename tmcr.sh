@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # GitHub organization details
-ORG="YOUR_ORGANIZATION_NAME"
-GITHUB_TOKEN="YOUR_PERSONAL_ACCESS_TOKEN"
+ORG="RafiCisco"
+GITHUB_TOKEN="GH_PAT"
 
 # Function to create a team
 create_team() {
