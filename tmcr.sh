@@ -2,7 +2,7 @@
 
 # Variables
 GITHUB_ORG="RafiCisco"
-GITHUB_TOKEN=$1
+GITHUB_TOKEN="gh_token"
 
 # Define repositories and their corresponding teams and permissions
 declare -A repos_teams=(
@@ -30,22 +30,14 @@ create_team() {
 
   echo "Creating team $team_name..."
 
-  RESPONSE=$(curl -s -X POST \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
-    https://api.github.com/orgs/$GITHUB_ORG/teams \
-    -d "{\"name\":\"$team_name\", \"description\":\"$team_description\"}")
+  github teams create --org $GITHUB_ORG --name "$team_name" --description "$team_description"
 
-  TEAM_SLUG=$(echo $RESPONSE | jq -r '.slug')
-
-  if [ "$TEAM_SLUG" == "null" ]; then
-    echo "Failed to create team. Response: $RESPONSE"
+  if [ $? -ne 0 ]; then
+    echo "Failed to create team."
     exit 1
   else
-    echo "Team created with slug: $TEAM_SLUG"
+    echo "Team created: $team_name"
   fi
-
-  echo $TEAM_SLUG
 }
 
 # Function to add a team to a repository with a specific permission
@@ -56,14 +48,10 @@ add_team_to_repo() {
 
   echo "Adding team $team_slug to repository $repo_name with $permission permission..."
 
-  RESPONSE=$(curl -s -X PUT \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
-    https://api.github.com/orgs/$GITHUB_ORG/teams/$team_slug/repos/$GITHUB_ORG/$repo_name \
-    -d "{\"permission\":\"$permission\"}")
+  github teams add-repo --org $GITHUB_ORG --team "$team_slug" --repo "$repo_name" --permission "$permission"
 
-  if echo $RESPONSE | grep -q '"message": "Not Found"'; then
-    echo "Failed to add team to repository. Response: $RESPONSE"
+  if [ $? -ne 0 ]; then
+    echo "Failed to add team to repository."
     exit 1
   else
     echo "Team $team_slug added to repository $repo_name with $permission permission."
@@ -76,74 +64,52 @@ create_project() {
 
   echo "Creating project $project_name..."
 
-  RESPONSE=$(curl -s -X POST \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.inertia-preview+json" \
-    https://api.github.com/orgs/$GITHUB_ORG/projects \
-    -d "{\"name\":\"$project_name\"}")
+  github gh api -X POST orgs/$GITHUB_ORG/projects -F name="$project_name"
 
-  PROJECT_ID=$(echo $RESPONSE | jq -r '.id')
-
-  if [ "$PROJECT_ID" == "null" ]; then
-    echo "Failed to create project. Response: $RESPONSE"
+  if [ $? -ne 0 ]; then
+    echo "Failed to create project."
     exit 1
   else
-    echo "Project created with ID: $PROJECT_ID"
+    echo "Project created: $project_name"
   fi
-
-  echo $PROJECT_ID
 }
 
 # Function to add repositories to a project
 add_repos_to_project() {
-  local project_id=$1
+  local project_name=$1
   shift
   local repos=("$@")
 
-  echo "Adding repositories ${repos[*]} to project $project_id..."
+  echo "Adding repositories ${repos[*]} to project $project_name..."
 
   for repo in "${repos[@]}"; do
-    RESPONSE=$(curl -s -X POST \
-      -H "Authorization: token $GITHUB_TOKEN" \
-      -H "Accept: application/vnd.github.inertia-preview+json" \
-      https://api.github.com/projects/$project_id/columns \
-      -d "{\"name\":\"$repo\"}")
-
-    COLUMN_ID=$(echo $RESPONSE | jq -r '.id')
-
-    if [ "$COLUMN_ID" == "null" ]; then
-      echo "Failed to add repository $repo to project. Response: $RESPONSE"
+    github projects create-column --project "$project_name" --name "$repo"
+    if [ $? -ne 0 ]; then
+      echo "Failed to add repository $repo to project."
+      exit 1
     else
-      echo "Repository $repo added to project $project_id."
+      echo "Repository $repo added to project $project_name."
     fi
   done
 }
 
-# Check if jq is installed
-if ! command -v jq &> /dev/null; then
-  echo "jq is required but it's not installed. Install jq and try again."
-  exit 1
-fi
+# Main script
+for team_name in "${!repos_teams[@]}"; do
+  create_team "$team_name" "${repos_teams[$team_name]}"
+done
 
-# Create teams and get their slugs
-admin_team_slug=$(create_team "admin" "Admin team with full access")
-dev_team_slug=$(create_team "dev" "Dev team with write access")
-
-# Add teams to repositories with specified permissions
-for repo in "${!repos_teams[@]}"; do
-  IFS=' ' read -r -a teams <<< "${repos_teams[$repo]}"
-  for team_info in "${teams[@]}"; do
-    IFS=':' read -r -a team_permission <<< "$team_info"
-    team_slug=$(eval echo \${${team_permission[0]}_team_slug})
-    permission=${team_permission[1]}
-    add_team_to_repo "$team_slug" "$repo" "$permission"
+for team_slug in "${!repos_teams[@]}"; do
+  for repo_permission in ${repos_teams[$team_slug]}; do
+    IFS=':' read -r -a repo_permission_arr <<< "$repo_permission"
+    repo_name="${repo_permission_arr[0]}"
+    permission="${repo_permission_arr[1]}"
+    add_team_to_repo "$team_slug" "$repo_name" "$permission"
   done
 done
 
-# Create projects and add repositories to them
 for project_name in "${!projects_repos[@]}"; do
-  project_id=$(create_project "$project_name")
-  add_repos_to_project "$project_id" ${projects_repos[$project_name]}
+  create_project "$project_name"
+  add_repos_to_project "$project_name" ${projects_repos[$project_name]}
 done
 
 echo "All teams created, assigned to repositories, and projects created."
