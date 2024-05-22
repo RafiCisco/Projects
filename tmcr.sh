@@ -27,7 +27,7 @@ get_repo_id() {
   
   # Make API request to get repository ID
   repo_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    "https://api.github.com/repos/$ORG/$repo_name" | jq -r '.id')
+    "https://api.github.com/repos/$ORG/$repo_name" )
   
   echo "$repo_id"
 }
