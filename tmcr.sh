@@ -17,16 +17,9 @@ TEAM2_NAME="team2"
 TEAM1_DESCRIPTION="Team 1 description"
 TEAM2_DESCRIPTION="Team 2 description"
 
-# Create Team 1
 response1=$(curl -X POST \
   -H "Authorization: token $TOKEN" \
   -d "{\"name\": \"$TEAM1_NAME\", \"description\": \"$TEAM1_DESCRIPTION\"}" \
   "https://api.github.com/orgs/$ORGANIZATION/teams")
 
-  
-
-
-# Extract Team 1 ID
-TEAM1_ID=$(echo "$response1" | jq -r '.id')
-
-echo "Team 1 created with ID: $TEAM1_ID"
+echo "Team 1 creation response: $response1"
