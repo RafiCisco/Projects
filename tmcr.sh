@@ -1,27 +1,36 @@
 #!/bin/bash
 
-# GitHub Organization or username
-ORGANIZATION="RafiCisco"
+# GitHub Organization name
+ORGANIZATION="RafiCisci"
 
-# Access GitHub token passed from workflow
-TOKEN="$1"
+# GitHub Token with appropriate permissions
+TOKEN="$TOKEN"
 
-# Now you can use $TOKEN in your script for making GitHub API requests or other operations
-echo "GitHub Token: $TOKEN"
+# Team name and description
+TEAM_NAME="admin"
+TEAM_DESCRIPTION="full access"
 
-# Team names
-TEAM1_NAME="team1"
+# Team privacy (closed or secret)
+TEAM_PRIVACY="closed"  # or "secret"
 
-#TEAM2_NAME="team2"
-
-# Team descriptions (optional)
-TEAM1_DESCRIPTION="Team 1 description"
-
-#TEAM2_DESCRIPTION="Team 2 description"
-
-response1=$(curl -X POST \
+# Create the team
+response=$(curl -s -X POST \
   -H "Authorization: token $TOKEN" \
-  -d "{\"name\": \"$TEAM1_NAME\", \"description\": \"$TEAM1_DESCRIPTION\"}" \
+  -H "Content-Type: application/json" \
+  -d "{\"name\": \"$TEAM_NAME\", \"description\": \"$TEAM_DESCRIPTION\", \"privacy\": \"$TEAM_PRIVACY\"}" \
   "https://api.github.com/orgs/$ORGANIZATION/teams")
 
-echo "Team 1 creation response: $response1"
+# Extract the team ID and check for errors
+TEAM_ID=$(echo "$response" | jq -r '.id')
+ERROR_MESSAGE=$(echo "$response" | jq -r '.message')
+
+if [[ "$TEAM_ID" == "null" ]]; then
+  echo "Error creating team: $ERROR_MESSAGE"
+  exit 1
+else
+  echo "Team '$TEAM_NAME' created with ID $TEAM_ID"
+fi
+
+# Optionally, display the created team's details
+echo "Team Details:"
+curl -s -H "Authorization: token $TOKEN" "https://api.github.com/teams/$TEAM_ID" | jq .
