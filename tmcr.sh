@@ -17,10 +17,10 @@ TEAM_PRIVACY="closed"  # or "secret"
 
 
 # Repositories to assign
-REPOSITORIES=("repoA1" "repoA2")
+REPOSITORIES=("repoB1" "repoB@")
 
 # Projects to assign (specify project IDs)
-PROJECTS=("project_id2" "project_id2")
+PROJECTS=("project_id3" "project_id3")
 
 
 # Function to create a team
@@ -44,6 +44,24 @@ create_team() {
   fi
 }
 
+# Function to assign a team to a repository
+assign_team_to_repo() {
+  local team_slug=$1
+  local repo_name=$2
+  local permission=$3
+  local response=$(curl -s -X PUT \
+    -H "Authorization: token $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"permission\": \"$permission\"}" \
+    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_slug/repos/$ORGANIZATION/$repo_name")
+  local status=$(echo "$response" | jq -r '.message')
+
+  if [[ "$status" != "null" ]]; then
+    echo "Error assigning team $team_slug to repo $repo_name: $status"
+  else
+    echo "Team '$team_slug' assigned to repo '$repo_name' with '$permission' permission"
+  fi
+}
 
 # Function to assign a team to a project
 assign_team_to_project() {
@@ -61,7 +79,6 @@ assign_team_to_project() {
     echo "Team '$team_id' assigned to project '$project_id'"
   fi
 }
-
 
 # Create teams and assign them to repositories and projects
 for team in "${!TEAMS[@]}"; do
