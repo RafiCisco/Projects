@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GitHub Organization name
-ORGANIZATION="RafiCisci"
+ORGANIZATION="RafiCisco"
 
 # GitHub Token with appropriate permissions
 TOKEN="$TOKEN"
