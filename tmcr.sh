@@ -41,4 +41,23 @@ create_team() {
 }
 
 # Create the team
-create_team "$TEAM_NAME" "$TEAM_DESCRIPTION" "$TEAM_PRIVACY"
+#create_team "$TEAM_NAME" "$TEAM_DESCRIPTION" "$TEAM_PRIVACY"
+
+
+# Function to get team details
+get_team_details() {
+  local team_id=$1
+
+  local response=$(curl -s -X GET \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Content-Type: application/json" \
+    "https://api.github.com/organizations/$ORGANIZATION/team/$team_id")
+
+  echo "$response" | jq '.'
+}
+
+# Create the team and get its details
+TEAM_ID=$(create_team "$TEAM_NAME" "$TEAM_DESCRIPTION" "$TEAM_PRIVACY")
+echo "Team '$TEAM_NAME' created with ID $TEAM_ID"
+echo "Team details:"
+get_team_details "$TEAM_ID"
