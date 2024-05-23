@@ -11,11 +11,13 @@ echo "GitHub Token: $TOKEN"
 
 # Team names
 TEAM1_NAME="team1"
-TEAM2_NAME="team2"
+
+#TEAM2_NAME="team2"
 
 # Team descriptions (optional)
 TEAM1_DESCRIPTION="Team 1 description"
-TEAM2_DESCRIPTION="Team 2 description"
+
+#TEAM2_DESCRIPTION="Team 2 description"
 
 response1=$(curl -X POST \
   -H "Authorization: token $TOKEN" \
