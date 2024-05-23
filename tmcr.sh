@@ -12,7 +12,7 @@ GITHUB_TOKEN="${GITHUB_TOKEN}"
 
 # Variables
 TEAM_NAMES=("admin" "dev")
-TEAM_DESCRIPTIONS=("Admin team with full access" "Development team with restricted access")
+TEAM_DESCRIPTIONS=("Admin team with full access" "Development team with write access")
 TEAM_PRIVACY="closed"  # or "secret"
 
 # Function to check if a team exists
