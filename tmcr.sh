@@ -14,10 +14,10 @@ TEAMS["admin"]="Admin team full access"
 TEAMS["dev"]="Dev team write access"
 
 # Repositories to assign
-REPOSITORIES=("repo1" "repo2")
+REPOSITORIES=("RepoA1" "RepoA2")
 
 # Projects to assign (specify project IDs)
-PROJECTS=("project_id1" "project_id2")
+PROJECTS=("Project_A" "Project_B")
 
 # Team privacy
 TEAM_PRIVACY="closed"  # or "secret"
