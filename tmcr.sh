@@ -11,7 +11,7 @@ ORGANIZATION="RafiCisco"
 TOKEN="${GITHUB_TOKEN}"
 
 # Variables
-TEAM_NAME="Admin"
+TEAM_NAME="Admin" #Always try to give unique name to create team name
 TEAM_DESCRIPTION="Admin team with full access"
 TEAM_PRIVACY="closed"  # or "secret"
 
