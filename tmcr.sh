@@ -20,7 +20,7 @@ TEAMS["dev"]="Dev team description"
 REPOSITORIES=("RepoA1" "RepoA2")
 
 # Projects to assign (specify project names)
-PROJECT_NAMES=("Project_A" "Project_B")
+PROJECT_NAMES=("Project_A")
 
 # Team privacy
 TEAM_PRIVACY="closed"  # or "secret"
