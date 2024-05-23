@@ -29,8 +29,9 @@ jobs:
 
       - name: Run Bash Script
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-        run: bash tmcr.sh $GITHUB_TOKEN
+          #GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          TOKEN: ${{ secrets.GH_PAT }}
+        run: bash tmcr.sh $TOKEN
 
       - name: Run script to assign teams
         run: |
