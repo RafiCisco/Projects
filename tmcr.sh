@@ -8,12 +8,28 @@ set -euo pipefail
 ORGANIZATION="RafiCisco"
 
 # GitHub Token with appropriate permissions
-TOKEN="${GITHUB_TOKEN}"
+GITHUB_TOKEN="${GITHUB_TOKEN}"
 
-
-TEAM_NAME="Admin" # Change team name if already exists
-TEAM_DESCRIPTION="Admin team with full access"
+# Variables
+TEAM_NAMES=("admin" "dev")
+TEAM_DESCRIPTIONS=("Admin team with full access" "Development team with restricted access")
 TEAM_PRIVACY="closed"  # or "secret"
+
+# Function to check if a team exists
+team_exists() {
+  local team_name=$1
+
+  local response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    "https://api.github.com/orgs/$ORGANIZATION/teams")
+
+  local team_id=$(echo "$response" | jq -r ".[] | select(.name == \"$team_name\") | .id")
+
+  if [[ -n "$team_id" ]]; then
+    echo "$team_id"
+  else
+    echo "false"
+  fi
+}
 
 # Function to create a team
 create_team() {
@@ -67,12 +83,25 @@ get_team_details() {
   echo "$response" | jq '.'
 }
 
-# Create the team and get its details
-TEAM_ID=$(create_team "$TEAM_NAME" "$TEAM_DESCRIPTION" "$TEAM_PRIVACY")
-echo "Team '$TEAM_NAME' created with ID $TEAM_ID"
+# Loop through team names and descriptions
+for i in "${!TEAM_NAMES[@]}"; do
+  TEAM_NAME="${TEAM_NAMES[$i]}"
+  TEAM_DESCRIPTION="${TEAM_DESCRIPTIONS[$i]}"
 
-# Fetch the team slug using the team ID
-TEAM_SLUG=$(get_team_slug "$TEAM_ID")
+  # Check if the team already exists
+  TEAM_ID=$(team_exists "$TEAM_NAME")
+  if [[ "$TEAM_ID" != "false" ]]; then
+    echo "Team '$TEAM_NAME' already exists with ID $TEAM_ID."
+    TEAM_SLUG=$(get_team_slug "$TEAM_ID")
+  else
+    # Create the team and get its details
+    TEAM_ID=$(create_team "$TEAM_NAME" "$TEAM_DESCRIPTION" "$TEAM_PRIVACY")
+    echo "Team '$TEAM_NAME' created with ID $TEAM_ID"
 
-echo "Fetching details for team '$TEAM_NAME' with slug '$TEAM_SLUG'..."
-get_team_details "$TEAM_SLUG"
+    # Fetch the team slug using the team ID
+    TEAM_SLUG=$(get_team_slug "$TEAM_ID")
+  fi
+
+  echo "Fetching details for team '$TEAM_NAME' with slug '$TEAM_SLUG'..."
+  get_team_details "$TEAM_SLUG"
+done
