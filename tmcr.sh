@@ -7,13 +7,13 @@ ORGANIZATION="RafiCisco"
 TOKEN="${GITHUB_TOKEN}"
 
 # Team name and description
-TEAM_NAME="admin"
-TEAM_DESCRIPTION="full access"
+#TEAM_NAME="admin"
+#TEAM_DESCRIPTION="full access"
 
 # Team details and description
-TEAM1_NAME="admin"
+TEAM1_NAME="admin1"
 TEAM1_DESCRIPTION="admin with full access"
-TEAM2_NAME="dev"
+TEAM2_NAME="dev1"
 TEAM2_DESCRIPTION="only write access for dev"
 TEAM_PRIVACY="closed"  # or "secret"
 
