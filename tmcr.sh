@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -e
+#set -e
+
+set -euo pipefail
 
 # GitHub Organization name
 ORGANIZATION="RafiCisco"
@@ -49,14 +51,14 @@ create_team() {
     -d "{\"name\": \"$team_name\", \"description\": \"$team_description\", \"privacy\": \"$TEAM_PRIVACY\"}" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
   local team_id=$(echo "$response" | jq -r '.id')
-  local error_message=$(echo "$response" | jq -r '.message')
 
   if [[ "$team_id" == "null" ]]; then
+    local error_message=$(echo "$response" | jq -r '.message')
     echo "Error creating team $team_name: $error_message"
     exit 1
   else
     echo "Team '$team_name' created with ID $team_id"
-    echo $team_id
+    echo "$team_id"
   fi
 }
 
@@ -74,6 +76,7 @@ assign_team_to_repo() {
   
   if [[ "$response" != "204" ]]; then
     echo "Error assigning team $team_slug to repo $repo_name"
+    exit 1
   else
     echo "Team '$team_slug' assigned to repo '$repo_name' with '$permission' permission"
   fi
@@ -92,6 +95,7 @@ assign_team_to_project() {
   
   if [[ "$response" != "204" ]]; then
     echo "Error assigning team $team_id to project $project_id"
+    exit 1
   else
     echo "Team '$team_id' assigned to project '$project_id'"
   fi
