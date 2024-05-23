@@ -10,10 +10,28 @@ ORGANIZATION="RafiCisco"
 # GitHub Token with appropriate permissions
 TOKEN="${GITHUB_TOKEN}"
 
-
-TEAM_NAME="Admin" # Change team name if already exists
+# Variables
+TEAM_NAME="Admin"
 TEAM_DESCRIPTION="Admin team with full access"
 TEAM_PRIVACY="closed"  # or "secret"
+
+
+
+# Function to check if a team exists
+team_exists() {
+  local team_name=$1
+
+  local response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    "https://api.github.com/orgs/$ORGANIZATION/teams")
+
+  local team_exists=$(echo "$response" | jq -r ".[] | select(.name == \"$team_name\") | .id")
+
+  if [[ -n "$team_exists" ]]; then
+    echo "true"
+  else
+    echo "false"
+  fi
+}
 
 # Function to create a team
 create_team() {
@@ -67,12 +85,17 @@ get_team_details() {
   echo "$response" | jq '.'
 }
 
-# Create the team and get its details
-TEAM_ID=$(create_team "$TEAM_NAME" "$TEAM_DESCRIPTION" "$TEAM_PRIVACY")
-echo "Team '$TEAM_NAME' created with ID $TEAM_ID"
+# Check if the team already exists
+if [[ $(team_exists "$TEAM_NAME") == "true" ]]; then
+  echo "Team '$TEAM_NAME' already exists."
+else
+  # Create the team and get its details
+  TEAM_ID=$(create_team "$TEAM_NAME" "$TEAM_DESCRIPTION" "$TEAM_PRIVACY")
+  echo "Team '$TEAM_NAME' created with ID $TEAM_ID"
 
-# Fetch the team slug using the team ID
-TEAM_SLUG=$(get_team_slug "$TEAM_ID")
+  # Fetch the team slug using the team ID
+  TEAM_SLUG=$(get_team_slug "$TEAM_ID")
 
-echo "Fetching details for team '$TEAM_NAME' with slug '$TEAM_SLUG'..."
-get_team_details "$TEAM_SLUG"
+  echo "Fetching details for team '$TEAM_NAME' with slug '$TEAM_SLUG'..."
+  get_team_details "$TEAM_SLUG"
+fi
