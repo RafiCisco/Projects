@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # GitHub Organization name
 ORGANIZATION="RafiCisco"
 
@@ -8,20 +10,17 @@ TOKEN="${GITHUB_TOKEN}"
 
 # Teams and their descriptions
 declare -A TEAMS
-TEAMS["admin4"]="Admin team full access"
-TEAMS["dev4"]="Dev team will have write access"
-
-
-# Team privacy (closed or secret)
-TEAM_PRIVACY="closed"  # or "secret"
-
+TEAMS["admin"]="Admin team full access"
+TEAMS["dev"]="Dev team write access"
 
 # Repositories to assign
-REPOSITORIES=("r1" "r2")
+REPOSITORIES=("repo1" "repo2")
 
 # Projects to assign (specify project IDs)
-PROJECTS=("p1" "p2")
+PROJECTS=("project_id1" "project_id2")
 
+# Team privacy
+TEAM_PRIVACY="closed"  # or "secret"
 
 # Function to create a team
 create_team() {
