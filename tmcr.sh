@@ -4,7 +4,7 @@
 ORGANIZATION="RafiCisco"
 
 # GitHub Token with appropriate permissions
-TOKEN="$TOKEN"
+TOKEN="${GITHUB_TOKEN}"
 
 # Team name and description
 TEAM_NAME="admin"
