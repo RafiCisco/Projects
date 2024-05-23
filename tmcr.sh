@@ -8,8 +8,8 @@ TOKEN="${GITHUB_TOKEN}"
 
 # Teams and their descriptions
 declare -A TEAMS
-TEAMS["admin"]="Admin team full access"
-TEAMS["dev"]="Dev team will have write access"
+TEAMS["admin1"]="Admin team full access"
+TEAMS["dev1"]="Dev team will have write access"
 
 
 # Team privacy (closed or secret)
@@ -17,11 +17,10 @@ TEAM_PRIVACY="closed"  # or "secret"
 
 
 # Repositories to assign
-REPOSITORIES=("RepoA1" "RepoA2" "RepoB1" "RepoB2")
+REPOSITORIES=("repo1" "repo2")
 
 # Projects to assign (specify project IDs)
-PROJECTS=("Project_A" "project_B")
-
+PROJECTS=("project_id1" "project_id2")
 
 
 # Function to create a team
