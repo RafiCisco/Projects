@@ -6,20 +6,23 @@ ORGANIZATION="RafiCisco"
 # GitHub Token with appropriate permissions
 TOKEN="${GITHUB_TOKEN}"
 
-# Team name and description
-#TEAM_NAME="admin"
-#TEAM_DESCRIPTION="full access"
-
-# Team details and description
-TEAM1_NAME="admin1"
-TEAM1_DESCRIPTION="admin with full access"
-TEAM2_NAME="dev1"
-TEAM2_DESCRIPTION="only write access for dev"
-TEAM_PRIVACY="closed"  # or "secret"
+# Teams and their descriptions
+declare -A TEAMS
+TEAMS["admin"]="Admin team full access"
+TEAMS["dev"]="Dev team will have write access"
 
 
 # Team privacy (closed or secret)
 TEAM_PRIVACY="closed"  # or "secret"
+
+
+# Repositories to assign
+REPOSITORIES=("RepoA1" "RepoA2" "RepoB1" "RepoB2")
+
+# Projects to assign (specify project IDs)
+PROJECTS=("Project_A" "project_B")
+
+
 
 # Function to create a team
 create_team() {
@@ -38,14 +41,43 @@ create_team() {
     exit 1
   else
     echo "Team '$team_name' created with ID $team_id"
+    echo $team_id
   fi
 }
 
-# Create Team 1
-create_team "$TEAM1_NAME" "$TEAM1_DESCRIPTION"
 
-# Create Team 2
-create_team "$TEAM2_NAME" "$TEAM2_DESCRIPTION"
+# Function to assign a team to a project
+assign_team_to_project() {
+  local team_id=$1
+  local project_id=$2
+  local response=$(curl -s -X PUT \
+    -H "Authorization: token $TOKEN" \
+    -H "Content-Type: application/json" \
+    "https://api.github.com/teams/$team_id/projects/$project_id")
+  local status=$(echo "$response" | jq -r '.message')
+
+  if [[ "$status" != "null" ]]; then
+    echo "Error assigning team $team_id to project $project_id: $status"
+  else
+    echo "Team '$team_id' assigned to project '$project_id'"
+  fi
+}
+
+
+# Create teams and assign them to repositories and projects
+for team in "${!TEAMS[@]}"; do
+  team_description=${TEAMS[$team]}
+  team_id=$(create_team "$team" "$team_description")
+  team_slug=$(echo $team | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+
+  for repo in "${REPOSITORIES[@]}"; do
+    assign_team_to_repo "$team_slug" "$repo" "push"  # use "push" for write access, "admin" for admin access, or "pull" for read access
+  done
+
+  for project in "${PROJECTS[@]}"; do
+    assign_team_to_project "$team_id" "$project"
+  done
+done
 
 # Display created teams
 echo "Displaying Teams:"
