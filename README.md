@@ -1,3 +1,2 @@
-# Projects
-# Multiple projects and Related repo's automation
-# Shell script
+# Shell script to create one team "Admin" and displaying its details
+# create a new team name if already exist
