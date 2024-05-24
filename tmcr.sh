@@ -10,7 +10,7 @@ org="RafiCisco"
 admin_team_name="admin"
 
 # Path to JSON file containing repository names
-json_file="repos.json"
+json_file="https://github.com/RafiCisco/Projects/blob/br4/repos.json"
 
 # Function to create an admin team with administrative access
 create_admin_team() {
