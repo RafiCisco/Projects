@@ -28,9 +28,15 @@ jobs:
 
 
       - name: Run Create Teams Script
+        #env:
+          #GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        #run: bash tmcr.sh
+
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: bash tmcr.sh
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+           chmod +x tmcr.sh
+           ./tmcr.sh $GITHUB_TOKEN
              
       #- name: Run script to assign teams
        # run: |
