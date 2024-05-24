@@ -3,7 +3,7 @@
  - If it is not existed then it will  create two teams or else it will not create    teams.  
  - "Admin team with full access".
  -  "Dev (Development) team with push(write) access".
- - We have existing repositories RepoA1 and RepoA2. 
+ - We need to have repositories RepoA1 and RepoA2 under org. 
  -  Two teams (Admin and dev)   are assigning to the existing Repo's.
  -  At last it will display assigning teams to the existing repo's in output workflow.
  # Output of the script
