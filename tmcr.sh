@@ -1,48 +1,37 @@
 #!/bin/bash
 
-# GitHub organization name
-ORG_NAME="RafiCisco"
+# GitHub Personal Access Token (Replace 'YOUR_TOKEN' with your actual token)
+token="${GITHUB_TOKEN}"
+#GITHUB_TOKEN="${GITHUB_TOKEN}"
 
-# GitHub Personal Access Token with appropriate permissions (provided as an environment variable)
-GITHUB_PAT=$1
+# GitHub Organization or User name (Replace 'YOUR_ORG' with your actual organization or user name)
+org="RafiCisco"
 
-# Team names
-ADMIN_TEAM="admin"
-DEV_TEAM="dev"
 
-# Function to assign a team to a repository
-assign_team_to_repo() {
-    local team_name=$1
-    local repo_full_name=$2
-    local permission=$3
+# Read input JSON file
+json_file="$1"
 
-    echo "Assigning repository '$repo_full_name' to team '$team_name' with '$permission' permission..."
+# Check if JSON file is provided as argument
+if [ -z "$json_file" ]; then
+    echo "Usage: $0 <input_json_file>"
+    exit 1
+fi
 
-    response=$(curl -s -X PUT \
-        -H "Authorization: token $GITHUB_PAT" \
+# Check if JSON file exists
+if [ ! -f "$json_file" ]; then
+    echo "Error: JSON file '$json_file' not found."
+    exit 1
+fi
+
+# Read JSON file and assign admin team to repositories
+repositories=$(jq -c '.repositories[]' "$json_file")
+while IFS= read -r repo; do
+    repo_name=$(echo "$repo" | jq -r '.name')
+    
+    # Assign admin team to repository
+    curl -X PUT \
+        -H "Authorization: token $token" \
         -H "Accept: application/vnd.github.v3+json" \
-        -d "{\"permission\": \"$permission\"}" \
-        "https://api.github.com/repos/$repo_full_name/teams/$team_name")
-
-    if [[ "$(echo "$response" | jq -r '.message')" == "null" ]]; then
-        echo "Assigned repository '$repo_full_name' to team '$team_name' with '$permission' permission."
-    else
-        echo "Error assigning repository '$repo_full_name' to team '$team_name': $(echo "$response" | jq -r '.message')"
-    fi
-}
-
-# Read project name from repos.json
-project_name=$(jq -r '.project_name' repos.json)
-
-# Read repositories from repos.json
-repos=$(jq -c '.repositories[]' repos.json)
-
-# Assign teams to repositories
-for repo in $repos; do
-    repo_full_name=$(echo "$repo" | jq -r '.full_name')
-
-    # Assign admin team with admin permission
-    assign_team_to_repo "$ADMIN_TEAM" "$repo_full_name" "admin"
-    # Assign dev team with write permission
-    assign_team_to_repo "$DEV_TEAM" "$repo_full_name" "write"
-done
+        "https://api.github.com/repos/$org/$repo_name/teams/admin"
+    echo "Assigned admin team to repository '$repo_name'"
+done <<< "$repositories"
