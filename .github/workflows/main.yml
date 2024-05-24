@@ -36,7 +36,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: bash tmcr.sh
-            #./tmcr.sh
 
        
       #- name: Run script to assign teams
