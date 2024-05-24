@@ -3,27 +3,27 @@
   "repositories": [
     {
       "name": "repoA1",
-      "full_name": "Raficisco/repoA1",
+      "full_name": "RafiCisco/Projects/tree/br4/projA/repoA1",
       "private": false
     },
     {
       "name": "repoA2",
-      "full_name": "Raficisco/repoA2",
+      "full_name": "RafiCisco/Projects/tree/br4/projA/repoA2",
       "private": false
     },
     {
       "name": "repoA3",
-      "full_name": "Raficisco/repoA3",
+      "full_name": "RafiCisco/Projects/tree/br4/projA/repoA3",
       "private": false
     },
     {
       "name": "repoA4",
-      "full_name": "Raficisco/repoA4",
+      "full_name": "RafiCisco/Projects/tree/br4/projA/repoA4",
       "private": false
     },
     {
       "name": "repoA5",
-      "full_name": "Raficisco/repoA5",
+      "full_name": "RafiCisco/Projects/tree/br4/projA/repoA5",
       "private": false
     }
   ]
