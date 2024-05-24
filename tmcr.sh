@@ -1,21 +1,17 @@
 #!/bin/bash
 
 # GitHub organization name
-ORG="RafiCisco"
+ORG_NAME="RafiCisco"
 
-# GitHub Personal Access Token with appropriate permissions
-GITHUB_TOKEN="${GITHUB_TOKEN}"
-
-
-# Project and repository names
-PROJECT_NAME="Project_A"
+# Repository name
 REPO_NAME="RepoA1"
 
 # Team names
 ADMIN_TEAM="admin"
 DEV_TEAM="dev"
 
-
+# GitHub Personal Access Token with appropriate permissions
+GITHUB_TOKEN="${GITHUB_TOKEN}"
 
 # Function to check if a team exists
 check_team_exists() {
@@ -124,4 +120,4 @@ if check_repo_exists "$REPO_NAME"; then
     assign_team_to_repo "$DEV_TEAM" "$REPO_NAME" "write"
 else
     echo "Repository '$REPO_NAME' does not exist"
-fi
+fi       
