@@ -5,7 +5,7 @@
 #"Development team with push(write) access"
 #At last it will display all the details of teams in output workflow
 #we have existing repositories RepoA1 and RepoA2.
-#Two teams (Admin and dev) are assiging to the existing Repo's
+#Two teams (Admin and dev) are assiging to the existing Repo's 
 Output
 
 #Team Admin does not exist.
