@@ -1,55 +1,28 @@
 #!/bin/bash
 
-# GitHub organization name
-ORG_NAME="RafiCisco"
-
-# Project name
-PROJECT_NAME="Project_A"
+# Variables
+ORG_NAME="RafiCisco"  # Replace with your actual organization name
+GITHUB_TOKEN="${GITHUB_TOKEN}"  # Replace with your GitHub personal access token
 
 # Team names
 ADMIN_TEAM="admin"
 DEV_TEAM="dev"
-
-# GitHub Personal Access Token with appropriate permissions
-GITHUB_TOKEN="${GITHUB_TOKEN}"
-
-# Function to check if a team exists
-check_team_exists() {
-    local team_name=$1
-
-    team_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-        "https://api.github.com/orgs/$ORG_NAME/teams?per_page=100" | jq -r ".[] | select(.name == \"$team_name\") | .id")
-
-    if [ -n "$team_id" ]; then
-        echo "Team '$team_name' exists with ID: $team_id"
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Function to check if a repository exists
-check_repo_exists() {
-    local repo_name=$1
-
-    response=$(curl -s -o /dev/null -w "%{http_code}" \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        "https://api.github.com/repos/$ORG_NAME/$repo_name")
-
-    if [ "$response" -eq 200 ]; then
-        echo "Repository '$repo_name' exists"
-        return 0
-    else
-        echo "Repository '$repo_name' does not exist"
-        return 1
-    fi
-}
 
 # Function to create a team
 create_team() {
     local team_name=$1
     local team_description=$2
 
+    # Check if team already exists
+    team_exists=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                        "https://api.github.com/orgs/$ORG_NAME/teams/$team_name" | jq -r '.id')
+
+    if [ "$team_exists" != "null" ]; then
+        echo "Team '$team_name' already exists with ID: $team_exists"
+        return 0
+    fi
+
+    # Create the team
     response=$(curl -s -X POST \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
@@ -58,7 +31,7 @@ create_team() {
 
     team_id=$(echo "$response" | jq -r '.id')
 
-    if [ -n "$team_id" ]; then
+    if [ -n "$team_id" ] && [ "$team_id" != "null" ]; then
         echo "Team '$team_name' created with ID: $team_id"
     else
         echo "Failed to create team '$team_name': $(echo "$response" | jq -r '.message')"
@@ -66,68 +39,40 @@ create_team() {
     fi
 }
 
-# Function to assign team to repository
+# Function to assign a team to a repository
 assign_team_to_repo() {
     local team_name=$1
     local repo_name=$2
-    local permission=$3
-
-    team_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-        "https://api.github.com/orgs/$ORG_NAME/teams?per_page=100" | jq -r ".[] | select(.name == \"$team_name\") | .id")
-
-    if [ -z "$team_id" ]; then
-        echo "Team '$team_name' not found"
-        exit 1
-    fi
+    local permission=$3  # admin, write, or pull
+    local project_name=$4
 
     response=$(curl -s -X PUT \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
         -d "{\"permission\": \"$permission\"}" \
-        "https://api.github.com/teams/$team_id/repos/$ORG_NAME/$repo_name")
+        "https://api.github.com/orgs/$ORG_NAME/teams/$team_name/repos/$ORG_NAME/$repo_name")
 
-    if [ "$(echo "$response" | jq -r '.message')" = "Not Found" ]; then
-        echo "Repository '$repo_name' not found"
-        exit 1
-    elif [ "$(echo "$response" | jq -r '.message')" = "Validation Failed" ]; then
-        echo "Error assigning repository '$repo_name' to team '$team_name': Validation Failed"
-        exit 1
+    if [ "$(echo "$response" | jq -r '.message')" == "null" ]; then
+        echo "Assigned repository '$repo_name' to team '$team_name' with '$permission' permission for project '$project_name'."
+    else
+        echo "Error assigning repository '$repo_name' to team '$team_name': $(echo "$response" | jq -r '.message') for project '$project_name'."
     fi
-
-    echo "Assigned team '$team_name' to repository '$repo_name' with '$permission' permission"
 }
 
-# Main script execution
+# Create admin and dev teams
+create_team "$ADMIN_TEAM" "Admin team with full access"
+create_team "$DEV_TEAM" "Development team with restricted access"
 
-# Check if admin team exists and create if it doesn't
-if ! check_team_exists "$ADMIN_TEAM"; then
-    create_team "$ADMIN_TEAM" "Admin team with full access"
-else
-    echo "Team '$ADMIN_TEAM' already exists"
-fi
+# Read project name from repos.json
+project_name=$(jq -r '.project_name' repos.json)
 
-# Check if dev team exists and create if it doesn't
-if ! check_team_exists "$DEV_TEAM"; then
-    create_team "$DEV_TEAM" "Development team with restricted access"
-else
-    echo "Team '$DEV_TEAM' already exists"
-fi
-
-# Get list of repositories in Project_A
-repositories=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    "https://api.github.com/orgs/$ORG_NAME/projects/$PROJECT_NAME/repos" | jq -r '.[] | .name')
-
-# Display project name
-echo "Project: $PROJECT_NAME"
+# Read repositories from repos.json
+repos=$(jq -r '.repositories[].name' repos.json)
 
 # Assign teams to repositories
-for repo in $repositories; do
-    if check_repo_exists "$repo"; then
-        # Assign admin team with admin permission
-        assign_team_to_repo "$ADMIN_TEAM" "$repo" "admin"
-        # Assign dev team with write permission
-        assign_team_to_repo "$DEV_TEAM" "$repo" "write"
-    else
-        echo "Repository '$repo' does not exist"
-    fi
+for repo in $repos; do
+    # Assign admin team with admin permission
+    assign_team_to_repo "$ADMIN_TEAM" "$repo" "admin" "$project_name"
+    # Assign dev team with write permission
+    assign_team_to_repo "$DEV_TEAM" "$repo" "write" "$project_name"
 done
