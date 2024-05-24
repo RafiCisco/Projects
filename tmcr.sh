@@ -13,7 +13,7 @@ json_file="$1"
 
 # Check if JSON file is provided as argument
 if [ -z "$json_file" ]; then
-    echo "Usage: $0 <input_json_file>"
+    echo "Usage: $0 repos.json"
     exit 1
 fi
 
