@@ -10,23 +10,26 @@ GITHUB_TOKEN="${GITHUB_TOKEN}"
 # Array to store existing teams
 existing_teams=()
 
+# Associative array to store team existence status
+declare -A team_status
+
 # Function to check if a team exists
 team_exists() {
   local team_name=$1
 
-  # Check if the team is in the existing_teams array
-  if [[ " ${existing_teams[@]} " =~ " $team_name " ]]; then
-    return 0 # Team exists
+  if [[ ${team_status[$team_name]} ]]; then
+    return ${team_status[$team_name]}
   fi
 
   local response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
 
   if echo "$response" | jq -e '.[].name' | grep -q "$team_name"; then
-    existing_teams+=("$team_name") # Add team to existing_teams array
-    return 0 # Team exists
+    team_status[$team_name]=0 # Team exists
+    return 0
   else
-    return 1 # Team does not exist
+    team_status[$team_name]=1 # Team does not exist
+    return 1
   fi
 }
 
