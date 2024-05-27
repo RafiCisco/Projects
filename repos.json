@@ -6,7 +6,7 @@
     },
     {
       "name": "projB",
-      "repositories": ["rb1", "rb2", "rb3", "rb4", "rb5"]
+      "repositories": ["rpb1", "rpb2", "rpb3", "rpb4", "rpb5"]
     }
   ]
 }
