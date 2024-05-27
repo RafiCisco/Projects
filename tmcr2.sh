@@ -71,6 +71,13 @@ add_repo_to_team() {
   fi
 }
 
+# Fetch and display repositories under the organization
+echo "Repositories under the organization:"
+repos=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/orgs/$ORGANIZATION/repos" | jq -r '.[].name')
+for repo in $repos; do
+  echo "$repo"
+done
+
 # Read project information from JSON file
 projects=$(jq -c '.projects[]' repos.json)
 
@@ -79,7 +86,7 @@ while IFS= read -r project; do
   project_name=$(echo "$project" | jq -r '.name')
 
   # Check if dev and admin teams exist, create if not
-  for team_name in "dev" "admin"; do
+  for team_name in "admin" "dev"; do
     if ! team_exists "$team_name"; then
       create_team "$team_name" "$team_name team" "closed"
     fi
@@ -91,20 +98,13 @@ while IFS= read -r project; do
   # Assign repositories to the teams
   repos=$(echo "$project" | jq -r '.repositories[]')
   for repo in $repos; do
-    add_repo_to_team "dev" "$ORGANIZATION/$repo" "push"
     add_repo_to_team "admin" "$ORGANIZATION/$repo" "admin"
+    add_repo_to_team "dev" "$ORGANIZATION/$repo" "push"
   done
 done <<< "$projects"
 
-# Display repositories under the organization
-echo "Repositories under the organization:"
-repos=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/orgs/$ORGANIZATION/repos" | jq -r '.[].name')
-for repo in $repos; do
-  echo "$repo"
-done
-
 # Display the repositories assigned to each team
-for team_name in "dev" "admin"; do
+for team_name in "admin" "dev"; do
   echo "Repositories assigned to team $team_name:"
   assigned_repos=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/orgs/$ORGANIZATION/teams/$team_name/repos" | jq -r '.[].name')
   for repo in $assigned_repos; do
