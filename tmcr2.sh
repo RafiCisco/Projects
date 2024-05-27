@@ -7,14 +7,23 @@ ORGANIZATION="RafiCisco"
 # GitHub Token with appropriate permissions
 GITHUB_TOKEN="your_github_token_here"
 
+# Array to store existing teams
+existing_teams=()
+
 # Function to check if a team exists
 team_exists() {
   local team_name=$1
+
+  # Check if the team is in the existing_teams array
+  if [[ " ${existing_teams[@]} " =~ " $team_name " ]]; then
+    return 0 # Team exists
+  fi
 
   local response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
 
   if echo "$response" | jq -e '.[].name' | grep -q "$team_name"; then
+    existing_teams+=("$team_name") # Add team to existing_teams array
     return 0 # Team exists
   else
     return 1 # Team does not exist
