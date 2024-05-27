@@ -44,10 +44,10 @@ create_team() {
   fi
 }
 
-# Read project names from repos.json
-projects=$(jq -r '.projects[].name' repos.json)
+# Read project names from projects.json
+projects=$(jq -r '.projects[].name' projects.json)
 
-echo "Projects and their repositories reading from repos.json:"
+echo "Projects:"
 while IFS= read -r project_name; do
   echo "Project: $project_name"
 
