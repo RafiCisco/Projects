@@ -1,3 +1,4 @@
+#!/bin/bash
 set -euo pipefail
 
 # GitHub Organization name
@@ -43,6 +44,25 @@ create_team() {
   fi
 }
 
+# Function to assign a team to a repository
+assign_team_to_repo() {
+  local team_name=$1
+  local repo_name=$2
+  local permission=$3
+
+  local response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"permission\": \"$permission\"}" \
+    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_name/repos/$ORGANIZATION/$repo_name")
+
+  if [[ "$response" -eq 204 ]]; then
+    echo "Team $team_name assigned to repository $repo_name with $permission permission."
+  else
+    echo "Error assigning team $team_name to repository $repo_name. HTTP status code: $response"
+  fi
+}
+
 # Read project names from repos.json
 projects=$(jq -r '.projects[].name' repos.json)
 
@@ -57,10 +77,14 @@ while IFS= read -r project_name; do
     fi
   done
 
-  # Assign dev team to the project
-  echo "Dev team assigned to project $project_name"
-  # Assign admin team to the project
-  echo "Admin team assigned to project $project_name"
+  # Assign dev and admin teams to the project repositories
+  repositories=$(jq -r --arg proj "$project_name" '.projects[] | select(.name == $proj) | .repositories[]' repos.json)
+  for repo in $repositories; do
+    assign_team_to_repo "dev" "$repo" "write"
+    assign_team_to_repo "admin" "$repo" "admin"
+  done
+
+  echo "Dev and admin teams assigned to repositories of project $project_name"
   echo "--------------------"
 
 done <<< "$projects"
