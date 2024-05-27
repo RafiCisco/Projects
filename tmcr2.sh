@@ -86,6 +86,6 @@ while IFS= read -r line; do
       add_repo_to_team "$team_name" "$ORGANIZATION/$repo" "admin"
     done
   done
-done < projects.json
+done < repos.json
 
 echo "Teams and repositories created and assigned successfully."
