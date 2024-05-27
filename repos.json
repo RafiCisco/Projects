@@ -2,11 +2,9 @@
   "projects": [
     {
       "name": "projA",
-      "repositories": ["rp1", "rp2", "rp3", "rp4", "rp5"]
-    },
+      },
     {
-      "name": "projB",
-      "repositories": ["rpb1", "rpb2", "rpb3", "rpb4", "rpb5"]
-    }
+      "name": "ProjB",
+     }
   ]
 }
