@@ -41,32 +41,12 @@ create_team() {
   fi
 }
 
-# Function to add repository to a team with specified permission
-add_repo_to_team() {
-  local team_name=$1
-  local repo_name=$2
-  local permission=$3
-
-  local response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Content-Type: application/json" \
-    -d "{\"permission\": \"$permission\"}" \
-    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_name/repos/$ORGANIZATION/$repo_name")
-
-  if [[ "$response" -eq 204 ]]; then
-    echo "Repository $repo_name added to team $team_name with $permission permission"
-  else
-    echo "Error adding repository $repo_name to team $team_name. HTTP status code: $response"
-  fi
-}
-
-# Read project and repository information from JSON file
+# Read project information from JSON file
 projects=$(jq -c '.projects[]' repos.json)
 
 # Loop through projects
 while IFS= read -r project; do
   project_name=$(echo "$project" | jq -r '.name')
-  repositories=$(echo "$project" | jq -r '.repositories[]')
 
   # Check if dev and admin teams exist, create if not
   for team_name in "dev" "admin"; do
@@ -75,13 +55,7 @@ while IFS= read -r project; do
     fi
   done
 
-  # Assign repositories to dev and admin teams
-  for repo in $repositories; do
-    for team_name in "dev" "admin"; do
-      add_repo_to_team "$team_name" "$repo" "push"
-    done
-  done
+  echo "Teams assigned to project: $project_name"
+  echo "--------------------"
 
 done <<< "$projects"
-
-echo "Repository assignment completed."
