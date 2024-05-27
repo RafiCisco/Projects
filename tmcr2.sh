@@ -1,11 +1,10 @@
 #!/bin/bash
-set -euo pipefail
 
 # GitHub Organization name
 ORGANIZATION="RafiCisco"
 
 # GitHub Token with appropriate permissions
-GITHUB_TOKEN="${GITHUB_TOKEN}"
+GITHUB_TOKEN="YOUR_GITHUB_TOKEN_HERE"
 
 # Function to check if a team exists
 team_exists() {
@@ -44,24 +43,33 @@ create_team() {
   fi
 }
 
-# Read project names from repos.json
-projects=$(jq -r '.projects[].name' repos.json)
+# Function to add team to a project
+add_team_to_project() {
+  local project_name=$1
+  local team_name=$2
 
-echo "Projects:"
-while IFS= read -r project_name; do
-  echo "Project: $project_name"
+  local response=$(curl -s -X PUT \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{}" \
+    "https://api.github.com/orgs/$ORGANIZATION/projects/$project_name/teams/$team_name")
 
-  # Check if dev and admin teams exist, create if not
-  for team_name in "dev" "admin"; do
-    if ! team_exists "$team_name"; then
-      create_team "$team_name" "$team_name team" "closed"
-    fi
-  done
+  if [[ "$response" == "" ]]; then
+    echo "Team $team_name added to project $project_name."
+  else
+    echo "Error adding team $team_name to project $project_name: $response"
+  fi
+}
 
-  # Assign dev team to the project
-  echo "Dev team assigned to project $project_name"
-  # Assign admin team to the project
-  echo "Admin team assigned to project $project_name"
-  echo "--------------------"
+# Create dev and admin teams if they don't exist
+for team_name in "dev" "admin"; do
+  if ! team_exists "$team_name"; then
+    create_team "$team_name" "$team_name team" "closed"
+  fi
+done
 
-done <<< "$projects"
+# Assign teams to projects
+add_team_to_project "projA" "dev"
+add_team_to_project "projA" "admin"
+add_team_to_project "projB" "dev"
+add_team_to_project "projB" "admin"
