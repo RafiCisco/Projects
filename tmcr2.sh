@@ -70,13 +70,21 @@ repo_names=$(jq -r '.[].name' "$repos_json")
 
 # Create teams and assign repositories
 for repo_name in $repo_names; do
-  # Create team if it doesn't exist
-  if [[ "$(team_exists "$repo_name")" == "false" ]]; then
-    create_team "$repo_name"
+  # Create admin team if it doesn't exist
+  if [[ "$(team_exists "admin-$repo_name")" == "false" ]]; then
+    create_team "admin-$repo_name"
   fi
 
-  # Add repository to the team
-  add_repo_to_team "$repo_name" "$repo_name" "admin" # Adjust permission as needed
+  # Add repository to the admin team with admin permission
+  add_repo_to_team "admin-$repo_name" "$repo_name" "admin"
+
+  # Create dev team if it doesn't exist
+  if [[ "$(team_exists "dev-$repo_name")" == "false" ]]; then
+    create_team "dev-$repo_name"
+  fi
+
+  # Add repository to the dev team with write permission
+  add_repo_to_team "dev-$repo_name" "$repo_name" "push"
 done
 
 echo "Teams and repositories created and assigned successfully."
