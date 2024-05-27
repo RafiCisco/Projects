@@ -47,19 +47,19 @@ create_team() {
 
 # Function to add repository to a team
 add_repo_to_team() {
-  local team_name=$1
+  local team_slug=$1
   local repo_name=$2
 
   local response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
     -d "{}" \
-    "https://api.github.com/teams/$team_name/repos/$ORGANIZATION/$repo_name")
+    "https://api.github.com/teams/$team_slug/repos/$ORGANIZATION/$repo_name")
 
   if [[ "$response" -eq 204 ]]; then
-    echo "Repo $repo_name added to team $team_name"
+    echo "Repo $repo_name added to team $team_slug"
   else
-    echo "Error adding repo $repo_name to team $team_name: HTTP status code $response"
+    echo "Error adding repo $repo_name to team $team_slug: HTTP status code $response"
     exit 1
   fi
 }
@@ -70,29 +70,31 @@ repo_names=$(jq -r '.[].name' "$repos_json")
 
 # Create admin and dev teams and assign repositories
 for repo_name in $repo_names; do
-  # Check if admin team exists, if not create it
-  if [[ "$(team_exists "admin-$repo_name")" == "false" ]]; then
-    admin_team_id=$(create_team "admin-$repo_name" "admin")
-    echo "Admin team created for $repo_name with ID $admin_team_id"
-  else
-    admin_team_id=$(team_exists "admin-$repo_name")
-    echo "Admin team for $repo_name already exists with ID $admin_team_id"
+  # Create admin team if it doesn't exist
+  if [[ "$(team_exists "admin")" == "false" ]]; then
+    create_team "admin" "admin"
   fi
 
-  # Check if dev team exists, if not create it
-  if [[ "$(team_exists "dev-$repo_name")" == "false" ]]; then
-    dev_team_id=$(create_team "dev-$repo_name" "push")
-    echo "Dev team created for $repo_name with ID $dev_team_id"
-  else
-    dev_team_id=$(team_exists "dev-$repo_name")
-    echo "Dev team for $repo_name already exists with ID $dev_team_id"
+  # Add repository to the admin team
+  add_repo_to_team "admin" "$repo_name"
+
+  # Create dev team if it doesn't exist
+  if [[ "$(team_exists "dev")" == "false" ]]; then
+    create_team "dev" "push"
   fi
 
-  # Assign repository to admin team
-  add_repo_to_team "$admin_team_id" "$repo_name"
-
-  # Assign repository to dev team
-  add_repo_to_team "$dev_team_id" "$repo_name"
+  # Add repository to the dev team
+  add_repo_to_team "dev" "$repo_name"
 done
 
+# Display information about teams and repositories
 echo "Teams and repositories created and assigned successfully."
+echo "----------------------------------------"
+echo "Admin Team:"
+curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/orgs/$ORGANIZATION/teams/admin" | jq '{Name: .name, ID: .id}'
+echo "----------------------------------------"
+echo "Dev Team:"
+curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/orgs/$ORGANIZATION/teams/dev" | jq '{Name: .name, ID: .id}'
+echo "----------------------------------------"
+echo "Repositories:"
+curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/orgs/$ORGANIZATION/repos" | jq '.[].name'
