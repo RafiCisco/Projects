@@ -1,10 +1,10 @@
 {
   "projects": [
     {
-      "name": "projA",
-      },
+      "name": "projA"
+    },
     {
-      "name": "ProjB",
-     }
+      "name": "projB"
+    }
   ]
 }
