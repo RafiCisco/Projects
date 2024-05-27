@@ -2,10 +2,38 @@
   "organization": "RafiCisco",
   "projects": [
     {
-      "name": "projA"
+      "name": "projA",
+      "repositories": [
+        {
+          "name": "rp1",
+          "url": "https://github.com/RafiCisco/projA/rp1"
+        },
+        {
+          "name": "rp2",
+          "url": "https://github.com/RafiCisco/projA/rp2"
+        },
+        {
+          "name": "rp3",
+          "url": "https://github.com/RafiCisco/projA/rp3"
+        }
+      ]
     },
     {
-      "name": "projB"
+      "name": "projB",
+      "repositories": [
+        {
+          "name": "rbp1",
+          "url": "https://github.com/RafiCisco/projB/rb1"
+        },
+        {
+          "name": "rbp2",
+          "url": "https://github.com/RafiCisco/projB/rb2"
+        },
+        {
+          "name": "rbp3",
+          "url": "https://github.com/RafiCisco/projB/rb3"
+        }
+      ]
     }
   ]
 }
