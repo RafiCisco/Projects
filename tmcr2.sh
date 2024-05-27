@@ -4,7 +4,7 @@
 ORGANIZATION="RafiCisco"
 
 # GitHub Token with appropriate permissions
-GITHUB_TOKEN="YOUR_GITHUB_TOKEN_HERE"
+GITHUB_TOKEN="${GITHUB_TOKEN}"
 
 # Function to check if a team exists
 team_exists() {
