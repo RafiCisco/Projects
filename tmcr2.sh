@@ -26,11 +26,12 @@ team_exists() {
 # Function to create a team
 create_team() {
   local team_name=$1
+  local permission=$2
 
   local response=$(curl -s -X POST \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{\"name\": \"$team_name\"}" \
+    -d "{\"name\": \"$team_name\", \"permission\": \"$permission\"}" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
 
   local team_id=$(echo "$response" | jq -r '.id')
@@ -44,23 +45,22 @@ create_team() {
   fi
 }
 
-# Function to add repository to a team with specified permission
+# Function to add repository to a team
 add_repo_to_team() {
-  local team_slug=$1
+  local team_name=$1
   local repo_name=$2
-  local permission=$3
 
   local response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{\"permission\": \"$permission\"}" \
-    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_slug/repos/$ORGANIZATION/$repo_name")
+    -d "{}" \
+    "https://api.github.com/teams/$team_name/repos/$ORGANIZATION/$repo_name")
 
-  if [[ "$response" -ne 204 ]]; then
-    echo "Error adding repo $repo_name to team $team_slug: HTTP status code $response"
-    exit 1
+  if [[ "$response" -eq 204 ]]; then
+    echo "Repo $repo_name added to team $team_name"
   else
-    echo "Repo $repo_name added to team $team_slug with $permission permission"
+    echo "Error adding repo $repo_name to team $team_name: HTTP status code $response"
+    exit 1
   fi
 }
 
@@ -68,23 +68,31 @@ add_repo_to_team() {
 repos_json="repos.json"
 repo_names=$(jq -r '.[].name' "$repos_json")
 
-# Create teams and assign repositories
+# Create admin and dev teams and assign repositories
 for repo_name in $repo_names; do
-  # Create admin team if it doesn't exist
+  # Check if admin team exists, if not create it
   if [[ "$(team_exists "admin-$repo_name")" == "false" ]]; then
-    create_team "admin-$repo_name"
+    admin_team_id=$(create_team "admin-$repo_name" "admin")
+    echo "Admin team created for $repo_name with ID $admin_team_id"
+  else
+    admin_team_id=$(team_exists "admin-$repo_name")
+    echo "Admin team for $repo_name already exists with ID $admin_team_id"
   fi
 
-  # Add repository to the admin team with admin permission
-  add_repo_to_team "admin-$repo_name" "$repo_name" "admin"
-
-  # Create dev team if it doesn't exist
+  # Check if dev team exists, if not create it
   if [[ "$(team_exists "dev-$repo_name")" == "false" ]]; then
-    create_team "dev-$repo_name"
+    dev_team_id=$(create_team "dev-$repo_name" "push")
+    echo "Dev team created for $repo_name with ID $dev_team_id"
+  else
+    dev_team_id=$(team_exists "dev-$repo_name")
+    echo "Dev team for $repo_name already exists with ID $dev_team_id"
   fi
 
-  # Add repository to the dev team with write permission
-  add_repo_to_team "dev-$repo_name" "$repo_name" "push"
+  # Assign repository to admin team
+  add_repo_to_team "$admin_team_id" "$repo_name"
+
+  # Assign repository to dev team
+  add_repo_to_team "$dev_team_id" "$repo_name"
 done
 
 echo "Teams and repositories created and assigned successfully."
