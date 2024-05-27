@@ -11,12 +11,14 @@ jobs:
 
     - name: script execute permission
       #run:  chmod +x tmcr.sh
-      run:  chmod +x tmcr1.sh
+      #run:  chmod +x tmcr1.sh
+      run:  chmod +x tmcr2.sh
       
 
     - name: Run Create Teams Script
       env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       #run: bash tmcr.sh
-      run: bash tmcr1.sh
+      #run: bash tmcr1.sh
+      run: bash tmcr2.sh
       
