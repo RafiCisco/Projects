@@ -69,7 +69,7 @@ create_team() {
 # Read project names from repos.json
 projects=$(jq -r '.projects[].name' repos.json)
 
-echo "Projects and their repositories reading from repos.json:"
+echo "Assigning teams (admin & dev) to the Projects present in repos.json:"
 while IFS= read -r project_name; do
   echo "Project: $project_name"
 
