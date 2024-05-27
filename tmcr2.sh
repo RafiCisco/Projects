@@ -26,13 +26,11 @@ team_exists() {
 # Function to create a team
 create_team() {
   local team_name=$1
-  local team_description=$2
-  local team_privacy=$3
 
   local response=$(curl -s -X POST \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{\"name\": \"$team_name\", \"description\": \"$team_description\", \"privacy\": \"$team_privacy\"}" \
+    -d "{\"name\": \"$team_name\"}" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
 
   local team_id=$(echo "$response" | jq -r '.id')
@@ -56,7 +54,7 @@ add_repo_to_team() {
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
     -d "{\"permission\": \"$permission\"}" \
-    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_slug/repos/$repo_name")
+    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_slug/repos/$ORGANIZATION/$repo_name")
 
   if [[ "$response" -ne 204 ]]; then
     echo "Error adding repo $repo_name to team $team_slug: HTTP status code $response"
@@ -66,24 +64,19 @@ add_repo_to_team() {
   fi
 }
 
-# Fetch all repositories in the organization
-repositories=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-  "https://api.github.com/orgs/$ORGANIZATION/repos?per_page=100" | jq -r '.[].name')
+# Read repository names from JSON file
+repos_json="repos.json"
+repo_names=$(jq -r '.[].name' "$repos_json")
 
-# Create admin and dev teams if they don't exist
-for team_name in "admin" "dev"; do
-  team_id=$(team_exists "$team_name")
-  if [[ "$team_id" == "false" ]]; then
-    create_team "$team_name" "$team_name team" "closed"
+# Create teams and assign repositories
+for repo_name in $repo_names; do
+  # Create team if it doesn't exist
+  if [[ "$(team_exists "$repo_name")" == "false" ]]; then
+    create_team "$repo_name"
   fi
-done
 
-# Assign repositories to admin and dev teams
-for repo in $repositories; do
-  for team_name in "admin" "dev"; do
-    team_id=$(team_exists "$team_name")
-    add_repo_to_team "$team_name" "$ORGANIZATION/$repo" "admin"
-  done
+  # Add repository to the team
+  add_repo_to_team "$repo_name" "$repo_name" "admin" # Adjust permission as needed
 done
 
 echo "Teams and repositories created and assigned successfully."
