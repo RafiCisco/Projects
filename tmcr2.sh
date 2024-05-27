@@ -26,12 +26,12 @@ team_exists() {
 # Function to create a team
 create_team() {
   local team_name=$1
-  local permission=$2
+  local privacy=$2
 
   local response=$(curl -s -X POST \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{\"name\": \"$team_name\", \"permission\": \"$permission\"}" \
+    -d "{\"name\": \"$team_name\", \"privacy\": \"$privacy\"}" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
 
   local team_id=$(echo "$response" | jq -r '.id')
@@ -72,7 +72,7 @@ repo_names=$(jq -r '.[].name' "$repos_json")
 for repo_name in $repo_names; do
   # Create admin team if it doesn't exist
   if [[ "$(team_exists "admin")" == "false" ]]; then
-    create_team "admin" "admin"
+    create_team "admin" "closed"
   fi
 
   # Add repository to the admin team
@@ -80,7 +80,7 @@ for repo_name in $repo_names; do
 
   # Create dev team if it doesn't exist
   if [[ "$(team_exists "dev")" == "false" ]]; then
-    create_team "dev" "push"
+    create_team "dev" "secret"
   fi
 
   # Add repository to the dev team
