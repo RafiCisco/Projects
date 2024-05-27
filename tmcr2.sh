@@ -5,7 +5,7 @@ set -euo pipefail
 ORGANIZATION="RafiCisco"
 
 # GitHub Token with appropriate permissions
-GITHUB_TOKEN="${GITHUB_TOKEN}"
+GITHUB_TOKEN="your_github_token_here"
 
 # Function to check if a team exists
 team_exists() {
