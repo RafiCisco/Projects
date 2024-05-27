@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # GitHub Organization name
 ORGANIZATION="RafiCisco"
@@ -13,10 +14,12 @@ team_exists() {
   local response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
 
-  if echo "$response" | jq -e '.[].name' | grep -q "$team_name"; then
-    return 0 # Team exists
+  local team_id=$(echo "$response" | jq -r ".[] | select(.name == \"$team_name\") | .id")
+
+  if [[ -n "$team_id" ]]; then
+    echo "$team_id"
   else
-    return 1 # Team does not exist
+    echo "false"
   fi
 }
 
@@ -43,33 +46,44 @@ create_team() {
   fi
 }
 
-# Function to add team to a project
-add_team_to_project() {
-  local project_name=$1
-  local team_name=$2
+# Function to add repository to a team with specified permission
+add_repo_to_team() {
+  local team_slug=$1
+  local repo_name=$2
+  local permission=$3
 
-  local response=$(curl -s -X PUT \
+  local response=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{}" \
-    "https://api.github.com/orgs/$ORGANIZATION/projects/$project_name/teams/$team_name")
+    -d "{\"permission\": \"$permission\"}" \
+    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_slug/repos/$repo_name")
 
-  if [[ "$response" == "" ]]; then
-    echo "Team $team_name added to project $project_name."
+  if [[ "$response" -ne 204 ]]; then
+    echo "Error adding repo $repo_name to team $team_slug: HTTP status code $response"
+    exit 1
   else
-    echo "Error adding team $team_name to project $project_name: $response"
+    echo "Repo $repo_name added to team $team_slug with $permission permission"
   fi
 }
 
-# Create dev and admin teams if they don't exist
-for team_name in "dev" "admin"; do
-  if ! team_exists "$team_name"; then
+# Fetch all repositories in the organization
+repositories=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+  "https://api.github.com/orgs/$ORGANIZATION/repos?per_page=100" | jq -r '.[].name')
+
+# Create admin and dev teams if they don't exist
+for team_name in "admin" "dev"; do
+  team_id=$(team_exists "$team_name")
+  if [[ "$team_id" == "false" ]]; then
     create_team "$team_name" "$team_name team" "closed"
   fi
 done
 
-# Assign teams to projects
-add_team_to_project "projA" "dev"
-add_team_to_project "projA" "admin"
-add_team_to_project "projB" "dev"
-add_team_to_project "projB" "admin"
+# Assign repositories to admin and dev teams
+for repo in $repositories; do
+  for team_name in "admin" "dev"; do
+    team_id=$(team_exists "$team_name")
+    add_repo_to_team "$team_name" "$ORGANIZATION/$repo" "admin"
+  done
+done
+
+echo "Teams and repositories created and assigned successfully."
