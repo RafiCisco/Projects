@@ -71,7 +71,7 @@ repositories=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
   "https://api.github.com/orgs/$ORGANIZATION/repos?per_page=100" | jq -r '.[].name')
 
 # Create admin and dev teams if they don't exist
-for team_name in "admin" "dev"; do
+for team_name in "dev" "admin"; do
   team_id=$(team_exists "$team_name")
   if [[ "$team_id" == "false" ]]; then
     create_team "$team_name" "$team_name team" "closed"
@@ -80,7 +80,7 @@ done
 
 # Assign repositories to admin and dev teams
 for repo in $repositories; do
-  for team_name in "admin" "dev"; do
+  for team_name in "dev" "admin"; do
     team_id=$(team_exists "$team_name")
     add_repo_to_team "$team_name" "$ORGANIZATION/$repo" "admin"
   done
