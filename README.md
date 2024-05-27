@@ -17,3 +17,6 @@
 #All projects under json file will have admin and dev level of access
 #Note:while running the workflow enable the permission line and execution of script line (tmcr2.sh) in main.yml
 ![image](https://github.com/RafiCisco/Projects/assets/33840574/74fa9ae5-59da-4706-96f9-a8ee8c868e04)
+
+![image](https://github.com/RafiCisco/Projects/assets/33840574/658ebf28-e9ce-48ab-93dd-e7cdfe9ee2da)
+
