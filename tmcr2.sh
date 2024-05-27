@@ -14,12 +14,10 @@ team_exists() {
   local response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
 
-  local team_id=$(echo "$response" | jq -r ".[] | select(.name == \"$team_name\") | .id")
-
-  if [[ -n "$team_id" ]]; then
-    echo "$team_id"
+  if echo "$response" | jq -e '.[].name' | grep -q "$team_name"; then
+    return 0 # Team exists
   else
-    echo "false"
+    return 1 # Team does not exist
   fi
 }
 
@@ -35,20 +33,17 @@ create_team() {
     -d "{\"name\": \"$team_name\", \"description\": \"$team_description\", \"privacy\": \"$team_privacy\"}" \
     "https://api.github.com/orgs/$ORGANIZATION/teams")
 
-  local team_id=$(echo "$response" | jq -r '.id')
-  local error_message=$(echo "$response" | jq -r '.message')
-
-  if [[ "$team_id" == "null" ]]; then
-    echo "Error creating team $team_name: $error_message"
-    exit 1
+  if echo "$response" | jq -e '.id' >/dev/null; then
+    echo "Team $team_name created successfully."
   else
-    echo "$team_id"
+    echo "Failed to create team $team_name."
+    exit 1
   fi
 }
 
 # Function to add repository to a team with specified permission
 add_repo_to_team() {
-  local team_slug=$1
+  local team_name=$1
   local repo_name=$2
   local permission=$3
 
@@ -56,36 +51,37 @@ add_repo_to_team() {
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
     -d "{\"permission\": \"$permission\"}" \
-    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_slug/repos/$repo_name")
+    "https://api.github.com/orgs/$ORGANIZATION/teams/$team_name/repos/$ORGANIZATION/$repo_name")
 
-  if [[ "$response" -ne 204 ]]; then
-    echo "Error adding repo $repo_name to team $team_slug: HTTP status code $response"
-    exit 1
+  if [[ "$response" -eq 204 ]]; then
+    echo "Repository $repo_name added to team $team_name with $permission permission"
   else
-    echo "Repo $repo_name added to team $team_slug with $permission permission"
+    echo "Error adding repository $repo_name to team $team_name. HTTP status code: $response"
   fi
 }
 
-# Read JSON file and assign repositories to teams
-while IFS= read -r line; do
-  project_name=$(echo "$line" | jq -r '.name')
-  repositories=$(echo "$line" | jq -r '.repositories[]')
+# Read project and repository information from JSON file
+projects=$(jq -c '.projects[]' repos.json)
 
-  # Create admin and dev teams if they don't exist
-  for team_name in "admin" "dev"; do
-    team_id=$(team_exists "$team_name")
-    if [[ "$team_id" == "false" ]]; then
+# Loop through projects
+while IFS= read -r project; do
+  project_name=$(echo "$project" | jq -r '.name')
+  repositories=$(echo "$project" | jq -r '.repositories[]')
+
+  # Check if dev and admin teams exist, create if not
+  for team_name in "dev" "admin"; do
+    if ! team_exists "$team_name"; then
       create_team "$team_name" "$team_name team" "closed"
     fi
   done
 
-  # Assign repositories to admin and dev teams
+  # Assign repositories to dev and admin teams
   for repo in $repositories; do
-    for team_name in "admin" "dev"; do
-      team_id=$(team_exists "$team_name")
-      add_repo_to_team "$team_name" "$ORGANIZATION/$repo" "admin"
+    for team_name in "dev" "admin"; do
+      add_repo_to_team "$team_name" "$repo" "push"
     done
   done
-done < repos.json
 
-echo "Teams and repositories created and assigned successfully."
+done <<< "$projects"
+
+echo "Repository assignment completed."
