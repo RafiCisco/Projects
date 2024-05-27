@@ -99,17 +99,6 @@ while IFS= read -r project; do
     fi
   done
 
-  echo "Teams assigned to project: $project_name"
-  echo "--------------------"
-
-  # Assign repositories to the teams
-  repos=$(echo "$project" | jq -r '.repositories[]')
-  for repo in $repos; do
-    add_repo_to_team "dev" "$ORGANIZATION/$repo" "push"
-    add_repo_to_team "admin" "$ORGANIZATION/$repo" "admin"
-  done
-done <<< "$projects"
-
 # Display the repositories assigned to each team
 for team_name in "dev" "admin"; do
   echo "Repositories assigned to team $team_name:"
