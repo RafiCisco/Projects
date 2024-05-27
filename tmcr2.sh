@@ -5,7 +5,7 @@ set -euo pipefail
 ORGANIZATION="RafiCisco"
 
 # GitHub Token with appropriate permissions
-GITHUB_TOKEN="${GITHUB_TOKEN}"
+GITHUB_TOKEN="your_github_token_here"
 
 # Function to check if a team exists
 team_exists() {
@@ -52,6 +52,8 @@ while IFS= read -r project; do
   for team_name in "dev" "admin"; do
     if ! team_exists "$team_name"; then
       create_team "$team_name" "$team_name team" "closed"
+    else
+      echo "Team $team_name already exists."
     fi
   done
 
