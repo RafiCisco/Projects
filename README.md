@@ -22,3 +22,11 @@ Output of the workflow and script
 repos.json file format  
 ![image](https://github.com/RafiCisco/Projects/assets/33840574/658ebf28-e9ce-48ab-93dd-e7cdfe9ee2da)  
 
+# tmcr3.sh
+#Shell script - repos.json as input file in shell script
+#Checks the teams and will create the teams,  projects under json file will have admin and dev level of access
+#Note:while running the workflow enable the permission line and execution of script line (tmcr3.sh) in main.yml  
+Output of the workflow and script
+![image](https://github.com/RafiCisco/Projects/assets/33840574/6cf4ec28-46ab-4faf-a5d4-a2bfb8447c72)  
+repos.json file format  
+![image](https://github.com/RafiCisco/Projects/assets/33840574/397c8866-4b9f-4bdc-a3df-b71d4ae8ec4f)
