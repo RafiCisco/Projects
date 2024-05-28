@@ -5,17 +5,17 @@
 # Code owners for the entire repository
 #* @global-owner1 @global-owner2
 * @Rafi98 
-* @RafiCisco/projecta_admin 
+
 
 
 # Individual file owner
-README.md @RafiCisco/projecta_dev
+README.md @admin
 
 
 
 
 # Assign all files in the repository to both Admin and Dev teams
-* @RafiCisco/projecta_admin 
+#* @RafiCisco/projecta_admin 
 
 # Code owners for a specific directory
 #/docs/ @RafiCisco/projecta_admin
