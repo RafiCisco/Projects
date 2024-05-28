@@ -9,13 +9,13 @@
 
 
 # Individual file owner
-README.md @admin
+README.md @Rafi98
 
 
 
 
 # Assign all files in the repository to both Admin and Dev teams
-#* @RafiCisco/projecta_admin 
+* @RafiCisco/admin
 
 # Code owners for a specific directory
 #/docs/ @RafiCisco/projecta_admin
