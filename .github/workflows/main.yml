@@ -14,6 +14,8 @@ jobs:
       #run:  chmod +x tmcr1.sh
       #run:  chmod +x tmcr2.sh
       run:  chmod +x tmcr3.sh
+    - name : print Hello world
+      run : echo "Hello world"
 
     - name: Run Create Teams Script
       env:
